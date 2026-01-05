@@ -101,4 +101,12 @@ export async function clearUsernameHistory() {
   await remove(STORAGE_KEYS.USERNAME_HISTORY);
 }
 
+// Clear all user data for privacy
+export async function clearAllUserData() {
+  await remove(STORAGE_KEYS.USERNAME_HISTORY);
+  await remove(STORAGE_KEYS.CACHED_RESULTS);
+  await remove(STORAGE_KEYS.LAST_CHECK);
+  await remove(STORAGE_KEYS.CHECKPOINT);
+}
+
 export { STORAGE_KEYS };

@@ -329,9 +329,19 @@ function showResultsIfCached(username) {
 
 async function handleClearHistory() {
   if (confirm(t('clearHistoryConfirm'))) {
-    await storage.clearUsernameHistory();
+    // Clear all user data from storage for privacy
+    await storage.clearAllUserData();
+
+    // Clear in-memory data
     recentUsernames = [];
+    currentResults = null;
+
+    // Update UI
     hideRecentDropdown();
+    hideAllSections();
+    showSection(elements.emptyState);
+    elements.screenNameInput.value = '';
+    elements.lastCheckInfo.textContent = '';
   }
 }
 
