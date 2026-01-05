@@ -46,9 +46,11 @@ const translations = {
     draftMessage: 'Draft Message',
     copyMessage: 'Copy Message',
     messageCopied: 'Copied!',
-    messageTemplate: `Hey friends! 👋 I just discovered an interesting tool called X Follow Checker (https://x-follow-checker.com) that helps see mutual follow status.
+    messageTemplate: `Hey friends! 👋 I noticed we're not yet mutual followers. Would you consider following back? Otherwise, our connection might be disconnected for some uncertain reasons... 🙈
 
-If you're interested in connecting more, feel free to check it out too! Let's support each other. 🤝
+I used a handy tool called X Follow Checker (https://x-follow-checker.com) to check mutual follow status — feel free to try it too!
+
+Let's support each other. 🤝
 
 {mentions}`
   },
@@ -97,9 +99,11 @@ If you're interested in connecting more, feel free to check it out too! Let's su
     draftMessage: '生成消息',
     copyMessage: '复制消息',
     messageCopied: '已复制！',
-    messageTemplate: `朋友们好！👋 我发现了一个有趣的工具 X Follow Checker (https://x-follow-checker.com)，可以查看互相关注的状态。
+    messageTemplate: `朋友们好！👋 我注意到咱们还不是互相关注的状态。方便的话可以考虑回关一下吗？不然的话，可能会因为某些不确定的原因断开连接哦... 🙈
 
-如果你也想更好地连接彼此，可以试试看！让我们互相支持吧 🤝
+我用了一个小工具 X Follow Checker (https://x-follow-checker.com) 来查看互关状态，你也可以试试看！
+
+让我们互相支持吧 🤝
 
 {mentions}`
   }
