@@ -18,6 +18,7 @@ const elements = {
   errorTitle: null,
   errorMessage: null,
   errorActionBtn: null,
+  reportIssueBtn: null,
   resultsSection: null,
   totalCount: null,
   mutualCount: null,
@@ -59,6 +60,7 @@ function initElements() {
   elements.errorTitle = document.getElementById('errorTitle');
   elements.errorMessage = document.getElementById('errorMessage');
   elements.errorActionBtn = document.getElementById('errorActionBtn');
+  elements.reportIssueBtn = document.getElementById('reportIssueBtn');
   elements.resultsSection = document.getElementById('resultsSection');
   elements.totalCount = document.getElementById('totalCount');
   elements.mutualCount = document.getElementById('mutualCount');
@@ -357,6 +359,10 @@ function showError(type, title, message) {
   elements.errorTitle.textContent = title;
   elements.errorMessage.textContent = message;
 
+  // Reset buttons
+  elements.errorActionBtn.classList.add('hidden');
+  elements.reportIssueBtn.classList.add('hidden');
+
   // Show action button for specific errors
   if (type === 'NOT_AUTHENTICATED') {
     elements.errorActionBtn.textContent = t('openX');
@@ -364,10 +370,25 @@ function showError(type, title, message) {
     elements.errorActionBtn.onclick = () => {
       chrome.tabs.create({ url: 'https://x.com/login' });
     };
-  } else {
+  } else if (type === 'RATE_LIMITED') {
     elements.errorActionBtn.textContent = t('retry');
     elements.errorActionBtn.classList.remove('hidden');
     elements.errorActionBtn.onclick = handleStartCheck;
+  } else {
+    // For unexpected errors (API_ERROR, NETWORK_ERROR, etc.)
+    elements.errorActionBtn.textContent = t('retry');
+    elements.errorActionBtn.classList.remove('hidden');
+    elements.errorActionBtn.onclick = handleStartCheck;
+
+    // Show report issue button for unexpected errors
+    elements.reportIssueBtn.classList.remove('hidden');
+    elements.reportIssueBtn.onclick = () => {
+      const issueTitle = encodeURIComponent(`Error: ${message}`);
+      const issueBody = encodeURIComponent(`**Error Type:** ${type}\n**Error Message:** ${message}\n\n**Steps to reproduce:**\n1. \n\n**Browser:** ${navigator.userAgent}`);
+      chrome.tabs.create({
+        url: `https://github.com/huangsen365/x-follow-checker/issues/new?title=${issueTitle}&body=${issueBody}`
+      });
+    };
   }
 }
 

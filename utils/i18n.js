@@ -40,7 +40,9 @@ const translations = {
     clearHistory: 'Clear History',
     clearHistoryConfirm: 'Clear all username history?',
     noHistory: 'No recent usernames',
-    viewOnGitHub: 'Star on GitHub'
+    viewOnGitHub: 'Star on GitHub',
+    reportIssue: 'Report Issue',
+    unexpectedError: 'Something went wrong. Please report this issue so we can fix it.'
   },
   zh: {
     appTitle: 'X 互关检测助手',
@@ -81,7 +83,9 @@ const translations = {
     clearHistory: '清除记录',
     clearHistoryConfirm: '确定清除所有用户名记录吗？',
     noHistory: '暂无记录',
-    viewOnGitHub: '在 GitHub 上加星'
+    viewOnGitHub: '在 GitHub 上加星',
+    reportIssue: '反馈问题',
+    unexpectedError: '出现了意外错误，请反馈此问题以便我们修复。'
   }
 };
 

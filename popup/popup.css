@@ -312,6 +312,26 @@ body {
   margin-bottom: 16px;
 }
 
+.error-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-link {
+  background: transparent;
+  color: #1d9bf0;
+  font-size: 13px;
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-link:hover {
+  text-decoration: underline;
+}
+
 /* Results Section */
 .results-section {
   display: flex;
