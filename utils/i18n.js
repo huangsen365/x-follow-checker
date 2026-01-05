@@ -1,4 +1,4 @@
-// Internationalization module - English (default) and Chinese
+// Internationalization module - English (default), Simplified Chinese, Traditional Chinese
 
 const translations = {
   en: {
@@ -106,6 +106,59 @@ Let's support each other. 🤝
 让我们互相支持吧 🤝
 
 {mentions}`
+  },
+  'zh-TW': {
+    appTitle: 'X 互追檢測助手',
+    startCheck: '開始檢測',
+    checking: '檢測中...',
+    stop: '停止',
+    following: '追蹤',
+    mutual: '互相追蹤',
+    notFollowingBack: '未回追',
+    all: '全部',
+    exportCSV: '匯出 CSV',
+    exportJSON: '匯出 JSON',
+    loading: '載入中...',
+    loadingProgress: '已載入 {count} 位用戶...',
+    error: '錯誤',
+    notLoggedIn: '請先登入 X.com',
+    notLoggedInDesc: '請開啟 X.com 並登入您的帳戶，然後重試。',
+    openX: '開啟 X.com',
+    rateLimited: '請求過於頻繁',
+    rateLimitedDesc: '請求次數過多，請等待幾分鐘後重試。',
+    networkError: '連線錯誤',
+    networkErrorDesc: '無法連線到 X.com，請檢查網路連線。',
+    retry: '重試',
+    noResults: '暫無結果',
+    noResultsDesc: '點擊「開始檢測」掃描您的追蹤列表。',
+    checkComplete: '檢測完成',
+    foundNotFollowing: '發現 {count} 位用戶未回追',
+    settings: '設定',
+    language: '語言',
+    viewProfile: '檢視個人頁面',
+    lastChecked: '上次檢測: {time}',
+    never: '從未',
+    users: '位用戶',
+    exportSuccess: '匯出成功！',
+    exportFailed: '匯出失敗',
+    confirmStop: '確定停止目前的檢測嗎？',
+    recentUsernames: '最近使用',
+    clearHistory: '清除記錄',
+    clearHistoryConfirm: '確定清除所有用戶名記錄嗎？',
+    noHistory: '暫無記錄',
+    viewOnGitHub: '在 GitHub 上加星',
+    reportIssue: '回報問題',
+    unexpectedError: '發生了意外錯誤，請回報此問題以便我們修復。',
+    draftMessage: '產生訊息',
+    copyMessage: '複製訊息',
+    messageCopied: '已複製！',
+    messageTemplate: `朋友們好！👋 我注意到咱們還不是互相追蹤的狀態。方便的話可以考慮回追一下嗎？不然的話，可能會因為某些不確定的原因「取消互追」哦... 🙈
+
+我用了一個小工具 X Follow Checker (https://x-follow-checker.com) 來查看互追狀態，你也可以試試看！
+
+讓我們互相支持吧 🤝
+
+{mentions}`
   }
 };
 
@@ -129,7 +182,8 @@ export function t(key, params = {}) {
 export function getAvailableLanguages() {
   return [
     { code: 'en', name: 'English' },
-    { code: 'zh', name: '中文' }
+    { code: 'zh', name: '简体中文' },
+    { code: 'zh-TW', name: '繁體中文' }
   ];
 }
 
