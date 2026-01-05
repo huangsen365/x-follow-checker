@@ -3,13 +3,50 @@
 // Public bearer token from X.com's JavaScript bundles
 const BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs=1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA';
 
-// GraphQL query IDs (these may change over time - update if 400 errors occur)
-const QUERY_IDS = {
+// Default GraphQL query IDs (fallback if not fetched from server)
+const DEFAULT_QUERY_IDS = {
   Following: 'eWTmcJY3EMh-dxIR7CYTKw',
   Followers: '1cgQROvByT7VpDSj3Ps5SQ',
   UserByScreenName: 'BQ6xjFU6Mgm-WhEP3OiT9w',
   Viewer: 'W62NnYgkgziw9bwyoVht0g'
 };
+
+// Storage key for dynamic query IDs
+const QUERY_IDS_STORAGE_KEY = 'queryIds';
+
+// Get query IDs from storage or use defaults
+async function getQueryIds() {
+  try {
+    const result = await chrome.storage.local.get(QUERY_IDS_STORAGE_KEY);
+    const stored = result[QUERY_IDS_STORAGE_KEY];
+    if (stored && Object.keys(stored).length > 0) {
+      // Merge with defaults (in case server doesn't provide all IDs)
+      return { ...DEFAULT_QUERY_IDS, ...stored };
+    }
+  } catch (e) {
+    console.warn('[API] Failed to get stored query IDs:', e);
+  }
+  return DEFAULT_QUERY_IDS;
+}
+
+// Save query IDs to storage
+export async function saveQueryIds(queryIds) {
+  if (queryIds && Object.keys(queryIds).length > 0) {
+    try {
+      await chrome.storage.local.set({ [QUERY_IDS_STORAGE_KEY]: queryIds });
+      console.log('[API] Query IDs updated:', queryIds);
+    } catch (e) {
+      console.warn('[API] Failed to save query IDs:', e);
+    }
+  }
+}
+
+// For backward compatibility - expose QUERY_IDS as getter
+const QUERY_IDS = new Proxy(DEFAULT_QUERY_IDS, {
+  get(target, prop) {
+    return target[prop];
+  }
+});
 
 // Feature flags required by X.com API
 const DEFAULT_FEATURES = {
@@ -195,7 +232,9 @@ export async function getUserByScreenName(screenName, csrfToken) {
     fieldToggles: JSON.stringify(FIELD_TOGGLES)
   });
 
-  const queryId = QUERY_IDS.UserByScreenName;
+  // Get dynamic query ID from storage
+  const queryIds = await getQueryIds();
+  const queryId = queryIds.UserByScreenName;
   const url = `https://x.com/i/api/graphql/${queryId}/UserByScreenName?${params}`;
 
   const data = await apiRequest(url, csrfToken);
@@ -240,7 +279,9 @@ export async function fetchFollowingPage(userId, cursor, csrfToken) {
     fieldToggles: JSON.stringify(FIELD_TOGGLES)
   });
 
-  const queryId = QUERY_IDS.Following;
+  // Get dynamic query ID from storage
+  const queryIds = await getQueryIds();
+  const queryId = queryIds.Following;
   const url = `https://x.com/i/api/graphql/${queryId}/Following?${params}`;
 
   return await apiRequest(url, csrfToken);
@@ -292,15 +333,16 @@ export function parseFollowingResponse(response) {
   return { users, nextCursor };
 }
 
-// Maximum users to fetch (to protect API token usage)
-const MAX_USERS_LIMIT = 1000;
+// Maximum users to fetch per batch (to protect API token usage)
+const MAX_USERS_PER_BATCH = 1000;
 
-// Fetch all following with pagination
-export async function fetchAllFollowing(userId, csrfToken, onProgress, signal) {
+// Fetch following with pagination (supports continuation)
+export async function fetchAllFollowing(userId, csrfToken, onProgress, signal, startCursor = null) {
   const allUsers = [];
-  let cursor = null;
+  let cursor = startCursor;
   let page = 0;
   let hitLimit = false;
+  let nextCursorForContinue = null;
 
   while (true) {
     // Check if cancelled
@@ -308,8 +350,8 @@ export async function fetchAllFollowing(userId, csrfToken, onProgress, signal) {
       throw new XApiError(ErrorTypes.API_ERROR, 'Check cancelled');
     }
 
-    // Check if we've hit the limit
-    if (allUsers.length >= MAX_USERS_LIMIT) {
+    // Check if we've hit the batch limit
+    if (allUsers.length >= MAX_USERS_PER_BATCH) {
       hitLimit = true;
       break;
     }
@@ -321,9 +363,11 @@ export async function fetchAllFollowing(userId, csrfToken, onProgress, signal) {
     page++;
 
     // Trim to max limit if exceeded
-    if (allUsers.length > MAX_USERS_LIMIT) {
-      allUsers.length = MAX_USERS_LIMIT;
+    if (allUsers.length > MAX_USERS_PER_BATCH) {
+      allUsers.length = MAX_USERS_PER_BATCH;
       hitLimit = true;
+      nextCursorForContinue = nextCursor;
+      break;
     }
 
     if (onProgress) {
@@ -334,22 +378,28 @@ export async function fetchAllFollowing(userId, csrfToken, onProgress, signal) {
       });
     }
 
-    if (hitLimit || !nextCursor || users.length === 0) {
+    if (!nextCursor || users.length === 0) {
+      // No more users to fetch
       break;
     }
 
     cursor = nextCursor;
+    nextCursorForContinue = nextCursor;
 
     // Rate limit protection - wait between requests
     await delay(1000);
   }
 
-  // Return with hitLimit flag
-  allUsers.hitLimit = hitLimit;
-  return allUsers;
+  // Return with metadata
+  return {
+    users: allUsers,
+    hitLimit: hitLimit,
+    nextCursor: hitLimit ? nextCursorForContinue : null,
+    hasMore: hitLimit && nextCursorForContinue !== null
+  };
 }
 
-export { MAX_USERS_LIMIT };
+export { MAX_USERS_PER_BATCH };
 
 // Utility function for delays
 function delay(ms) {
@@ -376,7 +426,9 @@ export async function getCurrentUser(csrfToken) {
     features: JSON.stringify(features)
   });
 
-  const queryId = QUERY_IDS.Viewer;
+  // Get dynamic query ID from storage
+  const queryIds = await getQueryIds();
+  const queryId = queryIds.Viewer;
   const url = `https://x.com/i/api/graphql/${queryId}/Viewer?${params}`;
 
   const data = await apiRequest(url, csrfToken);
@@ -395,5 +447,5 @@ export async function getCurrentUser(csrfToken) {
   };
 }
 
-// Export query IDs for potential updates
-export { QUERY_IDS, BEARER_TOKEN };
+// Export query IDs and utilities
+export { DEFAULT_QUERY_IDS as QUERY_IDS, BEARER_TOKEN, getQueryIds };

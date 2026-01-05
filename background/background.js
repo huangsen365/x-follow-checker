@@ -36,6 +36,9 @@ async function handleMessage(request, sender) {
     case 'START_CHECK':
       return await startCheck(request.screenName);
 
+    case 'CONTINUE_CHECK':
+      return await continueCheck(request.username);
+
     case 'STOP_CHECK':
       return stopCheck();
 
@@ -66,6 +69,7 @@ async function startCheck(screenName) {
   abortController = new AbortController();
   currentCheck = {
     status: 'running',
+    screenName: screenName,
     progress: { loaded: 0, page: 0 },
     startTime: Date.now()
   };
@@ -92,7 +96,7 @@ async function startCheck(screenName) {
       totalEstimate: currentUser.followingCount
     });
 
-    const following = await fetchAllFollowing(
+    const followingResult = await fetchAllFollowing(
       currentUser.id,
       tokens.csrfToken,
       (progress) => {
@@ -101,11 +105,15 @@ async function startCheck(screenName) {
           status: 'fetching_following',
           loaded: progress.loaded,
           page: progress.page,
-          totalEstimate: currentUser.followingCount
+          totalEstimate: currentUser.followingCount,
+          hitLimit: progress.hitLimit
         });
       },
       abortController.signal
     );
+
+    // Extract users array and metadata from result
+    const { users: following, hitLimit, nextCursor, hasMore } = followingResult;
 
     // Separate results
     const mutual = following.filter(u => u.followedBy);
@@ -121,13 +129,161 @@ async function startCheck(screenName) {
         mutualCount: mutual.length,
         notFollowingBackCount: notFollowingBack.length
       },
-      hitLimit: following.hitLimit || false
+      hitLimit: hitLimit,
+      nextCursor: nextCursor,
+      hasMore: hasMore
     };
 
     // Cache results
     await storage.setCachedResults(results);
     await storage.setLastCheck(Date.now());
     await storage.clearCheckpoint();
+
+    currentCheck = {
+      status: 'completed',
+      results: results
+    };
+
+    sendProgress({ status: 'completed', results: results });
+
+    return {
+      success: true,
+      data: results
+    };
+
+  } catch (error) {
+    currentCheck = {
+      status: 'error',
+      error: {
+        type: error.type || ErrorTypes.API_ERROR,
+        message: error.message,
+        details: error.details
+      }
+    };
+
+    if (error.message !== 'Check cancelled') {
+      sendProgress({
+        status: 'error',
+        error: currentCheck.error
+      });
+    }
+
+    return {
+      success: false,
+      error: currentCheck.error
+    };
+
+  } finally {
+    abortController = null;
+  }
+}
+
+async function continueCheck(username) {
+  // Get cached results for specific username
+  const cached = username
+    ? await storage.getCachedResults(username)
+    : await storage.getMostRecentCachedResults();
+
+  console.log('[ContinueCheck] Username:', username);
+  console.log('[ContinueCheck] Cached data found:', !!cached);
+  console.log('[ContinueCheck] hasMore:', cached?.hasMore);
+  console.log('[ContinueCheck] nextCursor:', cached?.nextCursor ? 'exists' : 'missing');
+
+  if (!cached) {
+    return {
+      success: false,
+      error: {
+        type: ErrorTypes.API_ERROR,
+        message: 'No cached results found. Please run a check first.'
+      }
+    };
+  }
+
+  if (!cached.hasMore || !cached.nextCursor) {
+    return {
+      success: false,
+      error: {
+        type: ErrorTypes.API_ERROR,
+        message: 'All users have been loaded. No more data to fetch.'
+      }
+    };
+  }
+
+  // Cancel any existing check
+  if (abortController) {
+    abortController.abort();
+  }
+
+  abortController = new AbortController();
+  currentCheck = {
+    status: 'running',
+    progress: { loaded: cached.following.length, page: 0 },
+    startTime: Date.now()
+  };
+
+  try {
+    // Get auth tokens
+    const tokens = await getAuthTokens();
+    if (!tokens.csrfToken) {
+      throw new XApiError(
+        ErrorTypes.NOT_AUTHENTICATED,
+        'Please log in to X.com first'
+      );
+    }
+
+    // Continue fetching from cursor
+    sendProgress({
+      status: 'fetching_following',
+      loaded: cached.following.length,
+      totalEstimate: cached.user.followingCount
+    });
+
+    const followingResult = await fetchAllFollowing(
+      cached.user.id,
+      tokens.csrfToken,
+      (progress) => {
+        currentCheck.progress = {
+          loaded: cached.following.length + progress.loaded,
+          page: progress.page
+        };
+        sendProgress({
+          status: 'fetching_following',
+          loaded: cached.following.length + progress.loaded,
+          page: progress.page,
+          totalEstimate: cached.user.followingCount,
+          hitLimit: progress.hitLimit
+        });
+      },
+      abortController.signal,
+      cached.nextCursor // Continue from where we left off
+    );
+
+    // Merge new users with existing
+    const { users: newUsers, hitLimit, nextCursor, hasMore } = followingResult;
+    const allFollowing = [...cached.following, ...newUsers];
+
+    // Recalculate mutual/notFollowingBack with all users
+    const mutual = allFollowing.filter(u => u.followedBy);
+    const notFollowingBack = allFollowing.filter(u => !u.followedBy);
+
+    const results = {
+      user: cached.user,
+      following: allFollowing,
+      mutual: mutual,
+      notFollowingBack: notFollowingBack,
+      stats: {
+        total: allFollowing.length,
+        mutualCount: mutual.length,
+        notFollowingBackCount: notFollowingBack.length
+      },
+      hitLimit: hitLimit,
+      nextCursor: nextCursor,
+      hasMore: hasMore
+    };
+
+    // Cache updated results
+    await storage.setCachedResults(results);
+    await storage.setLastCheck(Date.now());
 
     currentCheck = {
       status: 'completed',
@@ -183,14 +339,21 @@ function stopCheck() {
 }
 
 function getStatus() {
+  // Include totalEstimate from user info if available
+  const data = currentCheck ? {
+    ...currentCheck,
+    totalEstimate: currentCheck.user?.followingCount || 0
+  } : { status: 'idle' };
+
   return {
     success: true,
-    data: currentCheck || { status: 'idle' }
+    data: data
   };
 }
 
 async function getCachedResults() {
-  const cached = await storage.getCachedResults();
+  // Get the most recent cached result (for backward compatibility)
+  const cached = await storage.getMostRecentCachedResults();
   const lastCheck = await storage.getLastCheck();
 
   return {

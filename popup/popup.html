@@ -80,7 +80,10 @@
       <!-- Limit Warning -->
       <div id="limitWarning" class="limit-warning hidden">
         <span id="limitWarningText"></span>
-        <a id="limitWarningLink" href="#" target="_blank"></a>
+        <div class="limit-actions">
+          <button id="continueCheckBtn" class="btn btn-continue" data-i18n="continueCheck">Continue to Check</button>
+          <a id="limitWarningLink" href="#" target="_blank"></a>
+        </div>
       </div>
 
       <!-- Stats -->
@@ -146,6 +149,8 @@
 
     <!-- Footer -->
     <footer class="footer">
+      <!-- Server Notification (always shown if available) -->
+      <div id="serverNotification" class="server-notification hidden"></div>
       <div class="footer-row">
         <a href="https://github.com/huangsen365/x-follow-checker" target="_blank" class="github-link">
           <svg class="github-icon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor">

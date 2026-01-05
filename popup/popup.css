@@ -228,6 +228,33 @@ body {
   color: #536471;
 }
 
+.recent-item-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: #536471;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.recent-item:hover .recent-item-delete {
+  opacity: 1;
+}
+
+.recent-item-delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
 /* Clear History Button */
 .btn-clear {
   display: block;
@@ -408,7 +435,7 @@ body {
 
 /* Limit Warning */
 .limit-warning {
-  padding: 10px 12px;
+  padding: 12px 16px;
   background: #fff8e6;
   border-bottom: 1px solid #f0e0b0;
   font-size: 12px;
@@ -416,11 +443,56 @@ body {
   text-align: center;
 }
 
+.limit-warning > span {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.limit-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-continue {
+  padding: 8px 16px;
+  background: #1d9bf0;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-continue:hover:not(:disabled) {
+  background: #1a8cd8;
+}
+
+.btn-continue:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-continue .spinner-small {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  margin-right: 6px;
+}
+
 .limit-warning a {
   color: #1d9bf0;
   font-weight: 600;
   text-decoration: none;
-  margin-left: 4px;
+  font-size: 11px;
 }
 
 .limit-warning a:hover {
@@ -631,11 +703,48 @@ body {
   background: #8899a6;
 }
 
-/* Footer */
+/* Footer - always visible at bottom */
 .footer {
   padding: 10px 16px;
   border-top: 1px solid #eff3f4;
   background: #f7f9f9;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* Server Notification (from API) - Marquee Style */
+.server-notification {
+  margin-bottom: 8px;
+  padding: 8px 0;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border: 1px solid #64b5f6;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #1565c0;
+  line-height: 1.4;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+}
+
+.server-notification .marquee-content {
+  display: inline-block;
+  padding-left: 100%;
+  animation: marquee-scroll 15s linear infinite;
+}
+
+.server-notification:hover .marquee-content {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 
 .footer-row {
@@ -674,19 +783,27 @@ body {
 .update-link {
   display: block;
   margin-top: 8px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
   color: #fff;
   text-align: center;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 8px;
   animation: pulse-glow 1.5s ease-in-out infinite;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
 }
 
 .update-link:hover {
   background: linear-gradient(135deg, #ff5252 0%, #d63031 100%);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.6);
+}
+
+/* When update is available, make footer more prominent */
+.footer:has(.update-link:not(.hidden)) {
+  background: #fff5f5;
+  border-top: 2px solid #ff6b6b;
 }
 
 /* Draft Message Section */
@@ -745,24 +862,25 @@ body {
 }
 
 .go-post-hint {
-  margin-top: 16px;
-  padding: 16px 14px;
+  margin-top: 12px;
+  padding: 10px 12px;
   background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
   border: 2px solid #81c784;
-  border-radius: 10px;
-  font-size: 15px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
   color: #2e7d32;
   text-align: center;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .go-post-hint a {
   display: inline-block;
-  margin-top: 8px;
-  padding: 8px 16px;
+  margin-top: 6px;
+  padding: 6px 14px;
   background: #1d9bf0;
   color: #fff;
+  font-size: 13px;
   font-weight: 700;
   text-decoration: none;
   border-radius: 20px;

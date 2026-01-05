@@ -40,6 +40,7 @@ const translations = {
     recentUsernames: 'Recent',
     clearHistory: 'Clear History',
     clearHistoryConfirm: 'Clear all username history?',
+    confirmDeleteUsername: 'Delete @{username} and all its cached data?',
     noHistory: 'No recent usernames',
     detectUsername: 'Detect',
     detecting: 'Detecting...',
@@ -68,7 +69,9 @@ Let's support each other. 🤝
     latestVersion: '(latest)',
     currentVersion: 'v{version}',
     limitReached: 'Results limited to 1,000 users to protect API usage.',
-    requestMoreQuota: 'Need more? Request extra quota'
+    requestMoreQuota: 'Need more? Request extra quota',
+    continueCheck: 'Continue to Check',
+    continuingFrom: 'Continuing from {count} users...'
   },
   zh: {
     appTitle: 'X 互关检测助手',
@@ -109,6 +112,7 @@ Let's support each other. 🤝
     recentUsernames: '最近使用',
     clearHistory: '清除记录',
     clearHistoryConfirm: '确定清除所有用户名记录吗？',
+    confirmDeleteUsername: '确定删除 @{username} 及其所有缓存数据吗？',
     noHistory: '暂无记录',
     detectUsername: '检测',
     detecting: '检测中...',
@@ -137,7 +141,9 @@ Let's support each other. 🤝
     latestVersion: '(最新)',
     currentVersion: 'v{version}',
     limitReached: '为保护 API 使用量，结果限制为 1,000 位用户。',
-    requestMoreQuota: '需要更多？申请额外配额'
+    requestMoreQuota: '需要更多？申请额外配额',
+    continueCheck: '继续检测',
+    continuingFrom: '从 {count} 位用户继续检测...'
   },
   'zh-TW': {
     appTitle: 'X 互追檢測助手',
@@ -178,6 +184,7 @@ Let's support each other. 🤝
     recentUsernames: '最近使用',
     clearHistory: '清除記錄',
     clearHistoryConfirm: '確定清除所有用戶名記錄嗎？',
+    confirmDeleteUsername: '確定刪除 @{username} 及其所有快取資料嗎？',
     noHistory: '暫無記錄',
     detectUsername: '偵測',
     detecting: '偵測中...',
@@ -206,7 +213,9 @@ Let's support each other. 🤝
     latestVersion: '(最新)',
     currentVersion: 'v{version}',
     limitReached: '為保護 API 使用量，結果限制為 1,000 位用戶。',
-    requestMoreQuota: '需要更多？申請額外配額'
+    requestMoreQuota: '需要更多？申請額外配額',
+    continueCheck: '繼續檢測',
+    continuingFrom: '從 {count} 位用戶繼續檢測...'
   }
 };
 
