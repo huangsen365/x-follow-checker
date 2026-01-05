@@ -73,6 +73,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     console.log('[Popup] Event listeners set up');
 
+    // Check if a check is currently running in background
+    await checkRunningStatus();
+    console.log('[Popup] Running status checked');
+
     updateUI();
     console.log('[Popup] UI updated');
 
@@ -713,6 +717,47 @@ async function loadCachedResults() {
   }
 }
 
+// Check if a check is currently running in background
+async function checkRunningStatus() {
+  try {
+    const response = await chrome.runtime.sendMessage({ type: 'GET_STATUS' });
+    if (response.success && response.data) {
+      const status = response.data.status;
+      console.log('[Popup] Background status:', status);
+
+      if (status === 'running') {
+        // A check is in progress - show progress UI
+        setCheckingState(true);
+        hideAllSections();
+        showSection(elements.progressSection);
+
+        // Show current progress if available
+        const progress = response.data.progress;
+        if (progress) {
+          updateProgress(
+            progress.loaded ? Math.min(95, progress.loaded / 10) : 10,
+            t('loadingProgress', { count: progress.loaded || 0 })
+          );
+        } else {
+          updateProgress(10, t('loading'));
+        }
+      } else if (status === 'completed' && response.data.results) {
+        // Check completed while popup was closed
+        currentResults = response.data.results;
+      } else if (status === 'error' && response.data.error) {
+        // Error occurred while popup was closed - show it
+        showError(
+          response.data.error.type,
+          getErrorTitle(response.data.error.type),
+          response.data.error.message
+        );
+      }
+    }
+  } catch (error) {
+    console.error('Failed to check running status:', error);
+  }
+}
+
 function exportData(format) {
   if (!currentResults) return;
 
@@ -771,6 +816,11 @@ function showSection(section) {
 }
 
 function updateUI() {
+  // Don't update UI if a check is running
+  if (isChecking) {
+    return;
+  }
+
   hideAllSections();
 
   const screenName = elements.screenNameInput.value.trim();
