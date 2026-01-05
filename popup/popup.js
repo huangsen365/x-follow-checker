@@ -1112,21 +1112,36 @@ function showDraftSection() {
   elements.draftTextarea.focus();
 
   // Auto-scroll to show the Copy button above sticky footer
-  setTimeout(() => {
-    const container = document.querySelector('.container');
-    const footer = document.querySelector('.footer');
-    const footerHeight = footer ? footer.offsetHeight : 80;
-    const copyBtnRect = elements.copyMessageBtn.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
+  // Use multiple checks to ensure scroll is complete
+  scrollToShowCopyButton();
+}
 
-    const visibleBottom = containerRect.bottom - footerHeight;
-    const copyBtnBottom = copyBtnRect.bottom;
+// Smart scroll function that retries until element is visible above footer
+function scrollToShowElement(element, attempts = 0) {
+  const maxAttempts = 5;
+  const container = document.querySelector('.container');
+  const footer = document.querySelector('.footer');
+  const footerHeight = footer ? footer.offsetHeight : 80;
+  const elementRect = element.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
 
-    if (copyBtnBottom > visibleBottom) {
-      const scrollAmount = copyBtnBottom - visibleBottom + 16;
-      container.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+  const visibleBottom = containerRect.bottom - footerHeight;
+  const elementBottom = elementRect.bottom;
+
+  if (elementBottom > visibleBottom) {
+    const scrollAmount = elementBottom - visibleBottom + 20; // Extra padding
+    container.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+
+    // Check again after scroll animation completes
+    if (attempts < maxAttempts) {
+      setTimeout(() => scrollToShowElement(element, attempts + 1), 150);
     }
-  }, 50);
+  }
+}
+
+// Scroll to show Copy button
+function scrollToShowCopyButton() {
+  scrollToShowElement(elements.copyMessageBtn);
 }
 
 function hideDraftSection() {
@@ -1150,24 +1165,7 @@ async function copyMessage() {
     elements.goPostHint.classList.remove('hidden');
 
     // Auto-scroll to make the hint fully visible above sticky footer
-    // Use setTimeout to ensure DOM is updated before calculating positions
-    setTimeout(() => {
-      const container = document.querySelector('.container');
-      const footer = document.querySelector('.footer');
-      const footerHeight = footer ? footer.offsetHeight : 80; // Fallback height
-      const hintRect = elements.goPostHint.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-
-      // Calculate how much we need to scroll to show hint above footer
-      const visibleBottom = containerRect.bottom - footerHeight;
-      const hintBottom = hintRect.bottom;
-
-      if (hintBottom > visibleBottom) {
-        // Need to scroll down to show the hint
-        const scrollAmount = hintBottom - visibleBottom + 16; // 16px extra padding
-        container.scrollBy({ top: scrollAmount, behavior: 'smooth' });
-      }
-    }, 50);
+    scrollToShowElement(elements.goPostHint);
 
     setTimeout(() => {
       copyBtn.querySelector('.btn-copy-text').textContent = originalText;
