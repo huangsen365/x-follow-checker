@@ -1110,6 +1110,23 @@ function showDraftSection() {
   elements.draftSection.classList.remove('hidden');
   elements.draftTextarea.value = generateDraftMessage();
   elements.draftTextarea.focus();
+
+  // Auto-scroll to show the Copy button above sticky footer
+  setTimeout(() => {
+    const container = document.querySelector('.container');
+    const footer = document.querySelector('.footer');
+    const footerHeight = footer ? footer.offsetHeight : 80;
+    const copyBtnRect = elements.copyMessageBtn.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    const visibleBottom = containerRect.bottom - footerHeight;
+    const copyBtnBottom = copyBtnRect.bottom;
+
+    if (copyBtnBottom > visibleBottom) {
+      const scrollAmount = copyBtnBottom - visibleBottom + 16;
+      container.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+    }
+  }, 50);
 }
 
 function hideDraftSection() {
