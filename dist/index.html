@@ -656,8 +656,13 @@ body {
 .footer {
   padding: 10px 16px;
   border-top: 1px solid #eff3f4;
-  text-align: center;
   background: #f7f9f9;
+}
+
+.footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .github-link {
@@ -676,6 +681,33 @@ body {
 
 .github-icon {
   opacity: 0.8;
+}
+
+.version-info {
+  font-size: 11px;
+  color: #8899a6;
+}
+
+.version-latest {
+  color: #00ba7c;
+}
+
+.update-link {
+  display: block;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  color: #fff;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+.update-link:hover {
+  background: linear-gradient(135deg, #ff5252 0%, #d63031 100%);
 }
 
 /* Draft Message Section */
@@ -742,24 +774,6 @@ body {
   background: #1a8cd8;
 }
 
-/* Update Banner */
-.update-banner {
-  display: block;
-  padding: 10px 16px;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-  color: #fff;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  animation: pulse-glow 1.5s ease-in-out infinite;
-}
-
-.update-banner:hover {
-  background: linear-gradient(135deg, #ff5252 0%, #d63031 100%);
-}
-
 @keyframes pulse-glow {
   0%, 100% {
     opacity: 1;
@@ -767,7 +781,7 @@ body {
   }
   50% {
     opacity: 0.85;
-    box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+    box-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
   }
 }
 
@@ -997,6 +1011,7 @@ Let's support each other. 🤝
 
 {mentions}`,
     newVersionAvailable: '🎉 New version {version} available! Click to update.',
+    latestVersion: '(latest)',
     currentVersion: 'v{version}'
   },
   zh: {
@@ -1052,6 +1067,7 @@ Let's support each other. 🤝
 
 {mentions}`,
     newVersionAvailable: '🎉 新版本 {version} 已发布！点击更新。',
+    latestVersion: '(最新)',
     currentVersion: 'v{version}'
   },
   'zh-TW': {
@@ -1107,6 +1123,7 @@ Let's support each other. 🤝
 
 {mentions}`,
     newVersionAvailable: '🎉 新版本 {version} 已發佈！點擊更新。',
+    latestVersion: '(最新)',
     currentVersion: 'v{version}'
   }
 };

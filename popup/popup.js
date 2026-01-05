@@ -34,7 +34,8 @@ const elements = {
   userList: null,
   lastCheckInfo: null,
   emptyState: null,
-  updateBanner: null,
+  versionInfo: null,
+  updateLink: null,
   updateMessage: null
 };
 
@@ -84,7 +85,8 @@ function initElements() {
   elements.userList = document.getElementById('userList');
   elements.lastCheckInfo = document.getElementById('lastCheckInfo');
   elements.emptyState = document.getElementById('emptyState');
-  elements.updateBanner = document.getElementById('updateBanner');
+  elements.versionInfo = document.getElementById('versionInfo');
+  elements.updateLink = document.getElementById('updateLink');
   elements.updateMessage = document.getElementById('updateMessage');
 }
 
@@ -649,6 +651,9 @@ async function checkForUpdates() {
       currentVersion = manifest.version;
     }
 
+    // Show current version immediately
+    elements.versionInfo.textContent = `v${currentVersion}`;
+
     const response = await fetch(
       `https://version-check.x-follow-checker.com/is-latest-version?v=${currentVersion}`
     );
@@ -657,12 +662,17 @@ async function checkForUpdates() {
 
     const data = await response.json();
 
-    if (!data.isLatest && data.downloadUrl) {
+    if (data.isLatest) {
+      // Already on latest version
+      elements.versionInfo.textContent = `v${currentVersion} ${t('latestVersion')}`;
+      elements.versionInfo.classList.add('version-latest');
+    } else if (data.downloadUrl) {
+      // New version available - show update link
       elements.updateMessage.textContent = t('newVersionAvailable', {
         version: data.latestVersion
       });
-      elements.updateBanner.href = data.downloadUrl;
-      elements.updateBanner.classList.remove('hidden');
+      elements.updateLink.href = data.downloadUrl;
+      elements.updateLink.classList.remove('hidden');
     }
   } catch (error) {
     // Silently fail - version check is non-critical

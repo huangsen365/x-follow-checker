@@ -54,6 +54,7 @@ Let's support each other. 🤝
 
 {mentions}`,
     newVersionAvailable: '🎉 New version {version} available! Click to update.',
+    latestVersion: '(latest)',
     currentVersion: 'v{version}'
   },
   zh: {
@@ -109,6 +110,7 @@ Let's support each other. 🤝
 
 {mentions}`,
     newVersionAvailable: '🎉 新版本 {version} 已发布！点击更新。',
+    latestVersion: '(最新)',
     currentVersion: 'v{version}'
   },
   'zh-TW': {
@@ -164,6 +166,7 @@ Let's support each other. 🤝
 
 {mentions}`,
     newVersionAvailable: '🎉 新版本 {version} 已發佈！點擊更新。',
+    latestVersion: '(最新)',
     currentVersion: 'v{version}'
   }
 };
