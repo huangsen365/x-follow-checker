@@ -120,16 +120,15 @@ body {
   color: #0f1419;
   background: #fff;
   width: 360px;
-  height: 400px;
-  overflow: hidden;
+  min-height: 400px;
+  max-height: 600px;
 }
 
 .container {
-  display: flex;
-  flex-direction: column;
-  height: 400px;
-  position: relative;
-  padding-bottom: 50px; /* Space for footer */
+  width: 360px;
+  min-height: 400px;
+  max-height: 600px;
+  overflow-y: auto;
 }
 
 .hidden {
@@ -502,10 +501,6 @@ body {
 
 /* Results Section */
 .results-section {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
 }
 
 /* Stats */
@@ -590,9 +585,8 @@ body {
 
 /* User List */
 .user-list {
-  flex: 1;
   overflow-y: auto;
-  max-height: 200px;
+  max-height: 250px;
 }
 
 .user-item {
@@ -713,15 +707,11 @@ body {
   background: #8899a6;
 }
 
-/* Footer - always stays at bottom */
+/* Footer */
 .footer {
   padding: 10px 16px;
   border-top: 1px solid #eff3f4;
   background: #f7f9f9;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
 }
 
 .footer-row {
