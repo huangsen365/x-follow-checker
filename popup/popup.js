@@ -33,7 +33,9 @@ const elements = {
   filterTabs: null,
   userList: null,
   lastCheckInfo: null,
-  emptyState: null
+  emptyState: null,
+  updateBanner: null,
+  updateMessage: null
 };
 
 // State
@@ -49,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadCachedResults();
   setupEventListeners();
   updateUI();
+  checkForUpdates();
 });
 
 function initElements() {
@@ -81,6 +84,8 @@ function initElements() {
   elements.userList = document.getElementById('userList');
   elements.lastCheckInfo = document.getElementById('lastCheckInfo');
   elements.emptyState = document.getElementById('emptyState');
+  elements.updateBanner = document.getElementById('updateBanner');
+  elements.updateMessage = document.getElementById('updateMessage');
 }
 
 async function initLanguage() {
@@ -629,5 +634,38 @@ async function copyMessage() {
     }, 2000);
   } catch (error) {
     console.error('Failed to copy:', error);
+  }
+}
+
+// Version Check
+const APP_VERSION = '1.0.0'; // Fallback version for web
+
+async function checkForUpdates() {
+  try {
+    // Get current version from manifest (Chrome extension) or fallback
+    let currentVersion = APP_VERSION;
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest) {
+      const manifest = chrome.runtime.getManifest();
+      currentVersion = manifest.version;
+    }
+
+    const response = await fetch(
+      `https://version-check.x-follow-checker.com/is-latest-version?v=${currentVersion}`
+    );
+
+    if (!response.ok) return;
+
+    const data = await response.json();
+
+    if (!data.isLatest && data.downloadUrl) {
+      elements.updateMessage.textContent = t('newVersionAvailable', {
+        version: data.latestVersion
+      });
+      elements.updateBanner.href = data.downloadUrl;
+      elements.updateBanner.classList.remove('hidden');
+    }
+  } catch (error) {
+    // Silently fail - version check is non-critical
+    console.log('Version check failed:', error.message);
   }
 }

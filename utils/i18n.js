@@ -52,7 +52,9 @@ I used a handy tool called X Follow Checker (https://x-follow-checker.com) to ch
 
 Let's support each other. 🤝
 
-{mentions}`
+{mentions}`,
+    newVersionAvailable: '🎉 New version {version} available! Click to update.',
+    currentVersion: 'v{version}'
   },
   zh: {
     appTitle: 'X 互关检测助手',
@@ -105,7 +107,9 @@ Let's support each other. 🤝
 
 让我们互相支持吧 🤝
 
-{mentions}`
+{mentions}`,
+    newVersionAvailable: '🎉 新版本 {version} 已发布！点击更新。',
+    currentVersion: 'v{version}'
   },
   'zh-TW': {
     appTitle: 'X 互追檢測助手',
@@ -158,7 +162,9 @@ Let's support each other. 🤝
 
 讓我們互相支持吧 🤝
 
-{mentions}`
+{mentions}`,
+    newVersionAvailable: '🎉 新版本 {version} 已發佈！點擊更新。',
+    currentVersion: 'v{version}'
   }
 };
 

@@ -634,3 +634,32 @@ body {
 .btn-accent:hover:not(:disabled) {
   background: #1a8cd8;
 }
+
+/* Update Banner */
+.update-banner {
+  display: block;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  color: #fff;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+.update-banner:hover {
+  background: linear-gradient(135deg, #ff5252 0%, #d63031 100%);
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+  }
+  50% {
+    opacity: 0.85;
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+  }
+}
