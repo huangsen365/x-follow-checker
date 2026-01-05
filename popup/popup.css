@@ -570,3 +570,67 @@ body {
 .github-icon {
   opacity: 0.8;
 }
+
+/* Draft Message Section */
+.draft-section {
+  padding: 16px;
+  border-bottom: 1px solid #eff3f4;
+  background: #f7f9f9;
+}
+
+.draft-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #0f1419;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #536471;
+  padding: 0;
+  line-height: 1;
+}
+
+.btn-close:hover {
+  color: #0f1419;
+}
+
+.draft-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cfd9de;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 120px;
+  background: #fff;
+}
+
+.draft-textarea:focus {
+  outline: none;
+  border-color: #1d9bf0;
+}
+
+.draft-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.btn-accent {
+  background: #1d9bf0;
+  color: #fff;
+}
+
+.btn-accent:hover:not(:disabled) {
+  background: #1a8cd8;
+}

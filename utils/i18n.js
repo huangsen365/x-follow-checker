@@ -42,7 +42,15 @@ const translations = {
     noHistory: 'No recent usernames',
     viewOnGitHub: 'Star on GitHub',
     reportIssue: 'Report Issue',
-    unexpectedError: 'Something went wrong. Please report this issue so we can fix it.'
+    unexpectedError: 'Something went wrong. Please report this issue so we can fix it.',
+    draftMessage: 'Draft Message',
+    copyMessage: 'Copy Message',
+    messageCopied: 'Copied!',
+    messageTemplate: `Hey friends! 👋 I just discovered an interesting tool called X Follow Checker (https://x-follow-checker.com) that helps see mutual follow status.
+
+If you're interested in connecting more, feel free to check it out too! Let's support each other. 🤝
+
+{mentions}`
   },
   zh: {
     appTitle: 'X 互关检测助手',
@@ -85,7 +93,15 @@ const translations = {
     noHistory: '暂无记录',
     viewOnGitHub: '在 GitHub 上加星',
     reportIssue: '反馈问题',
-    unexpectedError: '出现了意外错误，请反馈此问题以便我们修复。'
+    unexpectedError: '出现了意外错误，请反馈此问题以便我们修复。',
+    draftMessage: '生成消息',
+    copyMessage: '复制消息',
+    messageCopied: '已复制！',
+    messageTemplate: `朋友们好！👋 我发现了一个有趣的工具 X Follow Checker (https://x-follow-checker.com)，可以查看互相关注的状态。
+
+如果你也想更好地连接彼此，可以试试看！让我们互相支持吧 🤝
+
+{mentions}`
   }
 };
 

@@ -678,6 +678,70 @@ body {
   opacity: 0.8;
 }
 
+/* Draft Message Section */
+.draft-section {
+  padding: 16px;
+  border-bottom: 1px solid #eff3f4;
+  background: #f7f9f9;
+}
+
+.draft-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #0f1419;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #536471;
+  padding: 0;
+  line-height: 1;
+}
+
+.btn-close:hover {
+  color: #0f1419;
+}
+
+.draft-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cfd9de;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 120px;
+  background: #fff;
+}
+
+.draft-textarea:focus {
+  outline: none;
+  border-color: #1d9bf0;
+}
+
+.draft-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.btn-accent {
+  background: #1d9bf0;
+  color: #fff;
+}
+
+.btn-accent:hover:not(:disabled) {
+  background: #1a8cd8;
+}
+
 
     /* Override popup styles for web */
     body > .container { display: none; }
@@ -892,7 +956,15 @@ const translations = {
     noHistory: 'No recent usernames',
     viewOnGitHub: 'Star on GitHub',
     reportIssue: 'Report Issue',
-    unexpectedError: 'Something went wrong. Please report this issue so we can fix it.'
+    unexpectedError: 'Something went wrong. Please report this issue so we can fix it.',
+    draftMessage: 'Draft Message',
+    copyMessage: 'Copy Message',
+    messageCopied: 'Copied!',
+    messageTemplate: `Hey friends! 👋 I just discovered an interesting tool called X Follow Checker (https://x-follow-checker.com) that helps see mutual follow status.
+
+If you're interested in connecting more, feel free to check it out too! Let's support each other. 🤝
+
+{mentions}`
   },
   zh: {
     appTitle: 'X 互关检测助手',
@@ -935,7 +1007,15 @@ const translations = {
     noHistory: '暂无记录',
     viewOnGitHub: '在 GitHub 上加星',
     reportIssue: '反馈问题',
-    unexpectedError: '出现了意外错误，请反馈此问题以便我们修复。'
+    unexpectedError: '出现了意外错误，请反馈此问题以便我们修复。',
+    draftMessage: '生成消息',
+    copyMessage: '复制消息',
+    messageCopied: '已复制！',
+    messageTemplate: `朋友们好！👋 我发现了一个有趣的工具 X Follow Checker (https://x-follow-checker.com)，可以查看互相关注的状态。
+
+如果你也想更好地连接彼此，可以试试看！让我们互相支持吧 🤝
+
+{mentions}`
   }
 };
 

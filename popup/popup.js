@@ -25,6 +25,11 @@ const elements = {
   notFollowingCount: null,
   exportCsvBtn: null,
   exportJsonBtn: null,
+  draftMessageBtn: null,
+  draftSection: null,
+  closeDraftBtn: null,
+  draftTextarea: null,
+  copyMessageBtn: null,
   filterTabs: null,
   userList: null,
   lastCheckInfo: null,
@@ -67,6 +72,11 @@ function initElements() {
   elements.notFollowingCount = document.getElementById('notFollowingCount');
   elements.exportCsvBtn = document.getElementById('exportCsvBtn');
   elements.exportJsonBtn = document.getElementById('exportJsonBtn');
+  elements.draftMessageBtn = document.getElementById('draftMessageBtn');
+  elements.draftSection = document.getElementById('draftSection');
+  elements.closeDraftBtn = document.getElementById('closeDraftBtn');
+  elements.draftTextarea = document.getElementById('draftTextarea');
+  elements.copyMessageBtn = document.getElementById('copyMessageBtn');
   elements.filterTabs = document.querySelectorAll('.filter-tab');
   elements.userList = document.getElementById('userList');
   elements.lastCheckInfo = document.getElementById('lastCheckInfo');
@@ -145,6 +155,11 @@ function setupEventListeners() {
   // Export buttons
   elements.exportCsvBtn.addEventListener('click', () => exportData('csv'));
   elements.exportJsonBtn.addEventListener('click', () => exportData('json'));
+
+  // Draft message buttons
+  elements.draftMessageBtn.addEventListener('click', showDraftSection);
+  elements.closeDraftBtn.addEventListener('click', hideDraftSection);
+  elements.copyMessageBtn.addEventListener('click', copyMessage);
 
   // Filter tabs
   elements.filterTabs.forEach(tab => {
@@ -575,4 +590,44 @@ function updateTranslations() {
     const key = el.dataset.i18n;
     el.textContent = t(key);
   });
+}
+
+// Draft Message Functions
+function generateDraftMessage() {
+  const nonFollowers = currentResults?.notFollowingBack || [];
+  const mentions = nonFollowers
+    .map(u => `@${u.screenName}`)
+    .join(' ');
+
+  const template = t('messageTemplate');
+  return template.replace('{mentions}', mentions);
+}
+
+function showDraftSection() {
+  elements.draftSection.classList.remove('hidden');
+  elements.draftTextarea.value = generateDraftMessage();
+  elements.draftTextarea.focus();
+}
+
+function hideDraftSection() {
+  elements.draftSection.classList.add('hidden');
+}
+
+async function copyMessage() {
+  try {
+    await navigator.clipboard.writeText(elements.draftTextarea.value);
+
+    // Show "Copied!" feedback
+    const copyBtn = elements.copyMessageBtn;
+    const originalText = copyBtn.querySelector('.btn-copy-text').textContent;
+    copyBtn.querySelector('.btn-copy-text').textContent = t('messageCopied');
+    copyBtn.disabled = true;
+
+    setTimeout(() => {
+      copyBtn.querySelector('.btn-copy-text').textContent = originalText;
+      copyBtn.disabled = false;
+    }, 2000);
+  } catch (error) {
+    console.error('Failed to copy:', error);
+  }
 }

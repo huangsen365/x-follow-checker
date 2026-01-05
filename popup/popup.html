@@ -89,6 +89,21 @@
       <div class="export-buttons">
         <button id="exportCsvBtn" class="btn btn-small" data-i18n="exportCSV">Export CSV</button>
         <button id="exportJsonBtn" class="btn btn-small" data-i18n="exportJSON">Export JSON</button>
+        <button id="draftMessageBtn" class="btn btn-small btn-accent" data-i18n="draftMessage">Draft Message</button>
+      </div>
+
+      <!-- Draft Message Section -->
+      <div id="draftSection" class="draft-section hidden">
+        <div class="draft-header">
+          <span data-i18n="draftMessage">Draft Message</span>
+          <button id="closeDraftBtn" class="btn-close">×</button>
+        </div>
+        <textarea id="draftTextarea" class="draft-textarea" rows="6"></textarea>
+        <div class="draft-actions">
+          <button id="copyMessageBtn" class="btn btn-primary">
+            <span class="btn-copy-text" data-i18n="copyMessage">Copy Message</span>
+          </button>
+        </div>
       </div>
 
       <!-- Filter Tabs -->
