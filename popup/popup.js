@@ -778,7 +778,11 @@ async function checkForUpdates() {
     console.log('[VersionCheck] isLatest value:', data.isLatest, 'type:', typeof data.isLatest);
     console.log('[VersionCheck] downloadUrl value:', data.downloadUrl);
 
-    if (data.isLatest === true) {
+    // Handle isLatest as boolean true, string "true", or number 1
+    const isLatest = data.isLatest === true || data.isLatest === 'true' || data.isLatest === 1;
+    console.log('[VersionCheck] Computed isLatest:', isLatest);
+
+    if (isLatest) {
       // Already on latest version
       console.log('[VersionCheck] Already on latest version - showing (latest)');
       const latestText = t('latestVersion');
@@ -790,13 +794,14 @@ async function checkForUpdates() {
       // New version available - show update link
       console.log('[VersionCheck] New version available:', data.latestVersion);
       elements.updateMessage.textContent = t('newVersionAvailable', {
-        version: data.latestVersion
+        version: data.latestVersion || 'new'
       });
       elements.updateLink.href = data.downloadUrl;
       elements.updateLink.classList.remove('hidden');
     } else {
-      console.log('[VersionCheck] isLatest is not true and no downloadUrl');
-      console.log('[VersionCheck] This means isLatest =', data.isLatest);
+      // Unknown response format - just show version without status
+      console.log('[VersionCheck] Unknown response format');
+      console.log('[VersionCheck] isLatest =', data.isLatest, ', downloadUrl =', data.downloadUrl);
     }
 
     console.log('[VersionCheck] Completed successfully');
