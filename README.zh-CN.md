@@ -3,6 +3,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/huangsen365/x-follow-checker?style=social)](https://github.com/huangsen365/x-follow-checker)
 [![GitHub issues](https://img.shields.io/github/issues/huangsen365/x-follow-checker)](https://github.com/huangsen365/x-follow-checker/issues)
 
+🌐 **官方网站：** [x-follow-checker.com](https://x-follow-checker.com) *（建设中）*
+
 一款 Chrome 扩展，用于检测你在 X.com（Twitter）上关注的哪些账号没有回关你。
 
 [English](./README.md) | 简体中文 | [繁體中文](./README.zh-TW.md)

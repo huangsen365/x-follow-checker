@@ -3,6 +3,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/huangsen365/x-follow-checker?style=social)](https://github.com/huangsen365/x-follow-checker)
 [![GitHub issues](https://img.shields.io/github/issues/huangsen365/x-follow-checker)](https://github.com/huangsen365/x-follow-checker/issues)
 
+🌐 **Official Website:** [x-follow-checker.com](https://x-follow-checker.com) *(coming soon)*
+
 A Chrome extension to check which accounts you follow on X.com (Twitter) don't follow you back.
 
 English | [简体中文](./README.zh-CN.md) | [繁體中文](./README.zh-TW.md)

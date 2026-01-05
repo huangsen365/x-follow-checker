@@ -3,6 +3,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/huangsen365/x-follow-checker?style=social)](https://github.com/huangsen365/x-follow-checker)
 [![GitHub issues](https://img.shields.io/github/issues/huangsen365/x-follow-checker)](https://github.com/huangsen365/x-follow-checker/issues)
 
+🌐 **官方網站：** [x-follow-checker.com](https://x-follow-checker.com) *（建設中）*
+
 一款 Chrome 擴充功能，用於檢測你在 X.com（Twitter）上關注的哪些帳號沒有回追你。
 
 [English](./README.md) | [简体中文](./README.zh-CN.md) | 繁體中文
