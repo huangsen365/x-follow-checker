@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X Follow Checker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="title" data-i18n="appTitle">X Follow Checker</h1>
+      <select id="langSelect" class="lang-select">
+        <option value="en">EN</option>
+        <option value="zh">中文</option>
+      </select>
+    </header>
+
+    <!-- Input Section -->
+    <section class="input-section">
+      <div class="input-group">
+        <span class="input-prefix">@</span>
+        <input
+          type="text"
+          id="screenNameInput"
+          class="screen-name-input"
+          placeholder="your_username"
+          autocomplete="off"
+        >
+      </div>
+      <button id="startBtn" class="btn btn-primary">
+        <span class="btn-text" data-i18n="startCheck">Start Check</span>
+        <span class="btn-loading hidden">
+          <span class="spinner"></span>
+          <span data-i18n="checking">Checking...</span>
+        </span>
+      </button>
+    </section>
+
+    <!-- Progress Section -->
+    <section id="progressSection" class="progress-section hidden">
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+      <p id="progressText" class="progress-text">Loading...</p>
+    </section>
+
+    <!-- Error Section -->
+    <section id="errorSection" class="error-section hidden">
+      <div class="error-icon">⚠️</div>
+      <h3 id="errorTitle" class="error-title">Error</h3>
+      <p id="errorMessage" class="error-message"></p>
+      <button id="errorActionBtn" class="btn btn-secondary hidden"></button>
+    </section>
+
+    <!-- Results Section -->
+    <section id="resultsSection" class="results-section hidden">
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat-item">
+          <span class="stat-value" id="totalCount">0</span>
+          <span class="stat-label" data-i18n="following">Following</span>
+        </div>
+        <div class="stat-item stat-mutual">
+          <span class="stat-value" id="mutualCount">0</span>
+          <span class="stat-label" data-i18n="mutual">Mutual</span>
+        </div>
+        <div class="stat-item stat-not-following">
+          <span class="stat-value" id="notFollowingCount">0</span>
+          <span class="stat-label" data-i18n="notFollowingBack">Not Following Back</span>
+        </div>
+      </div>
+
+      <!-- Export Buttons -->
+      <div class="export-buttons">
+        <button id="exportCsvBtn" class="btn btn-small" data-i18n="exportCSV">Export CSV</button>
+        <button id="exportJsonBtn" class="btn btn-small" data-i18n="exportJSON">Export JSON</button>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all" data-i18n="all">All</button>
+        <button class="filter-tab" data-filter="mutual" data-i18n="mutual">Mutual</button>
+        <button class="filter-tab" data-filter="notFollowing" data-i18n="notFollowingBack">Not Following Back</button>
+      </div>
+
+      <!-- User List -->
+      <div id="userList" class="user-list">
+        <!-- Users will be rendered here -->
+      </div>
+
+      <!-- Last Check Info -->
+      <p id="lastCheckInfo" class="last-check-info"></p>
+    </section>
+
+    <!-- Empty State -->
+    <section id="emptyState" class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3 data-i18n="noResults">No results yet</h3>
+      <p data-i18n="noResultsDesc">Click "Start Check" to scan your following list.</p>
+    </section>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
