@@ -113,6 +113,12 @@
   box-sizing: border-box;
 }
 
+html, body {
+  height: 400px;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   font-size: 14px;
@@ -128,8 +134,8 @@ body {
 .container {
   display: flex;
   flex-direction: column;
-  height: 100%;
   min-height: 400px;
+  height: 100%;
 }
 
 .hidden {
@@ -432,6 +438,7 @@ body {
 /* Progress Section */
 .progress-section {
   padding: 16px;
+  flex: 1;
 }
 
 .progress-bar {
@@ -460,6 +467,7 @@ body {
 .error-section {
   padding: 32px 16px;
   text-align: center;
+  flex: 1;
 }
 
 .error-icon {
@@ -676,6 +684,7 @@ body {
 .empty-state {
   padding: 48px 16px;
   text-align: center;
+  flex: 1;
 }
 
 .empty-icon {
