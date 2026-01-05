@@ -21,18 +21,8 @@ body {
 .container {
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 400px;
-  max-height: 600px;
-  height: 100vh;
-}
-
-/* Main content wrapper - grows to push footer down */
-.main-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0; /* Important: allows flex children to shrink below content size */
-  overflow: hidden;
 }
 
 .hidden {
@@ -408,7 +398,6 @@ body {
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-height: 0; /* Important: allows flex children to shrink */
   overflow: hidden;
 }
 
@@ -496,7 +485,7 @@ body {
 .user-list {
   flex: 1;
   overflow-y: auto;
-  min-height: 0; /* Important: allows scrolling in flex container */
+  max-height: 280px;
 }
 
 .user-item {
@@ -622,7 +611,6 @@ body {
   padding: 10px 16px;
   border-top: 1px solid #eff3f4;
   background: #f7f9f9;
-  flex-shrink: 0;
   margin-top: auto;
 }
 
