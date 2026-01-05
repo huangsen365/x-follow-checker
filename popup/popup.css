@@ -745,23 +745,32 @@ body {
 }
 
 .go-post-hint {
-  margin-top: 12px;
-  padding: 10px 12px;
-  background: #e8f5e9;
-  border-radius: 8px;
-  font-size: 13px;
+  margin-top: 16px;
+  padding: 16px 14px;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border: 2px solid #81c784;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
   color: #2e7d32;
   text-align: center;
+  line-height: 1.5;
 }
 
 .go-post-hint a {
-  color: #1d9bf0;
-  font-weight: 600;
+  display: inline-block;
+  margin-top: 8px;
+  padding: 8px 16px;
+  background: #1d9bf0;
+  color: #fff;
+  font-weight: 700;
   text-decoration: none;
+  border-radius: 20px;
 }
 
 .go-post-hint a:hover {
-  text-decoration: underline;
+  background: #1a8cd8;
+  text-decoration: none;
 }
 
 .btn-accent {

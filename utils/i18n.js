@@ -56,7 +56,7 @@ const translations = {
     draftMessage: 'Draft Message',
     copyMessage: 'Copy Message',
     messageCopied: 'Copied!',
-    goPostMessage: 'Now go to {link} to post your message!',
+    goPostMessage: '✅ Message copied! Now go post it:',
     messageTemplate: `Hey friends! 👋 I noticed we're not yet mutual followers. Would you consider following back? Otherwise, I might have to "clean up my following list" for some uncertain reasons... 🙈
 
 I used a handy tool called X Follow Checker (https://x-follow-checker.com) to check mutual follow status — feel free to try it too!
@@ -125,7 +125,7 @@ Let's support each other. 🤝
     draftMessage: '生成消息',
     copyMessage: '复制消息',
     messageCopied: '已复制！',
-    goPostMessage: '现在去 {link} 发布消息吧！',
+    goPostMessage: '✅ 消息已复制！现在去发布吧：',
     messageTemplate: `朋友们好！👋 我注意到咱们还不是互相关注的状态。方便的话可以考虑回关一下吗？不然的话，可能会因为某些不确定的原因"取消互关"哦... 🙈
 
 我用了一个小工具 X Follow Checker (https://x-follow-checker.com) 来查看互关状态，你也可以试试看！
@@ -194,7 +194,7 @@ Let's support each other. 🤝
     draftMessage: '產生訊息',
     copyMessage: '複製訊息',
     messageCopied: '已複製！',
-    goPostMessage: '現在去 {link} 發佈訊息吧！',
+    goPostMessage: '✅ 訊息已複製！現在去發佈吧：',
     messageTemplate: `朋友們好！👋 我注意到咱們還不是互相追蹤的狀態。方便的話可以考慮回追一下嗎？不然的話，可能會因為某些不確定的原因「取消互追」哦... 🙈
 
 我用了一個小工具 X Follow Checker (https://x-follow-checker.com) 來查看互追狀態，你也可以試試看！

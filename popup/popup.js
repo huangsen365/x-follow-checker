@@ -822,9 +822,9 @@ async function copyMessage() {
     copyBtn.querySelector('.btn-copy-text').textContent = t('messageCopied');
     copyBtn.disabled = true;
 
-    // Show "go post" hint with clickable link
-    const xHomeLink = '<a href="https://x.com/home" target="_blank">x.com/home</a>';
-    elements.goPostHint.innerHTML = t('goPostMessage', { link: xHomeLink });
+    // Show "go post" hint with clickable button
+    const goPostText = t('goPostMessage', { link: '' }).replace('{link}', '').trim();
+    elements.goPostHint.innerHTML = `${goPostText}<br><a href="https://x.com/home" target="_blank">x.com/home →</a>`;
     elements.goPostHint.classList.remove('hidden');
 
     setTimeout(() => {
