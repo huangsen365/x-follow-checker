@@ -5,7 +5,7 @@
 
 一款 Chrome 扩展，用于检测你在 X.com（Twitter）上关注的哪些账号没有回关你。
 
-[English](./README.md) | [繁體中文](./README.zh-TW.md)
+[English](./README.md) | 简体中文 | [繁體中文](./README.zh-TW.md)
 
 ## 功能特点
 

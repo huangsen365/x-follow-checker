@@ -5,7 +5,7 @@
 
 A Chrome extension to check which accounts you follow on X.com (Twitter) don't follow you back.
 
-[简体中文](./README.zh-CN.md) | [繁體中文](./README.zh-TW.md)
+English | [简体中文](./README.zh-CN.md) | [繁體中文](./README.zh-TW.md)
 
 ## Features
 

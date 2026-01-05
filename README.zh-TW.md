@@ -5,7 +5,7 @@
 
 一款 Chrome 擴充功能，用於檢測你在 X.com（Twitter）上關注的哪些帳號沒有回追你。
 
-[English](./README.md) | [简体中文](./README.zh-CN.md)
+[English](./README.md) | [简体中文](./README.zh-CN.md) | 繁體中文
 
 ## 功能特點
 
