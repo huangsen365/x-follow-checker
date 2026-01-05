@@ -1096,8 +1096,25 @@ async function copyMessage() {
     elements.goPostHint.innerHTML = `${goPostText}<br><a href="https://x.com/home" target="_blank">x.com/home →</a>`;
     elements.goPostHint.classList.remove('hidden');
 
-    // Auto-scroll to make the hint visible
-    elements.goPostHint.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    // Auto-scroll to make the hint fully visible above sticky footer
+    // Use setTimeout to ensure DOM is updated before calculating positions
+    setTimeout(() => {
+      const container = document.querySelector('.container');
+      const footer = document.querySelector('.footer');
+      const footerHeight = footer ? footer.offsetHeight : 80; // Fallback height
+      const hintRect = elements.goPostHint.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      // Calculate how much we need to scroll to show hint above footer
+      const visibleBottom = containerRect.bottom - footerHeight;
+      const hintBottom = hintRect.bottom;
+
+      if (hintBottom > visibleBottom) {
+        // Need to scroll down to show the hint
+        const scrollAmount = hintBottom - visibleBottom + 16; // 16px extra padding
+        container.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+      }
+    }, 50);
 
     setTimeout(() => {
       copyBtn.querySelector('.btn-copy-text').textContent = originalText;
