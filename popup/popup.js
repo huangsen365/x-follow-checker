@@ -1116,27 +1116,48 @@ function showDraftSection() {
   scrollToShowCopyButton();
 }
 
-// Smart scroll function that retries until element is visible above footer
-function scrollToShowElement(element, attempts = 0) {
-  const maxAttempts = 5;
-  const container = document.querySelector('.container');
-  const footer = document.querySelector('.footer');
-  const footerHeight = footer ? footer.offsetHeight : 80;
-  const elementRect = element.getBoundingClientRect();
-  const containerRect = container.getBoundingClientRect();
+// Smart scroll function - waits for layout then scrolls element into view above footer
+function scrollToShowElement(element) {
+  // Wait for next frame to ensure layout is complete
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const container = document.querySelector('.container');
+      const footer = document.querySelector('.footer');
+      const footerHeight = footer ? footer.offsetHeight : 80;
+      const elementRect = element.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
 
-  const visibleBottom = containerRect.bottom - footerHeight;
-  const elementBottom = elementRect.bottom;
+      const visibleBottom = containerRect.bottom - footerHeight;
+      const elementBottom = elementRect.bottom;
 
-  if (elementBottom > visibleBottom) {
-    const scrollAmount = elementBottom - visibleBottom + 20; // Extra padding
-    container.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+      if (elementBottom > visibleBottom) {
+        const scrollAmount = elementBottom - visibleBottom + 20;
 
-    // Check again after scroll animation completes
-    if (attempts < maxAttempts) {
-      setTimeout(() => scrollToShowElement(element, attempts + 1), 150);
-    }
-  }
+        // Listen for scroll end to verify element is visible
+        const onScrollEnd = () => {
+          container.removeEventListener('scrollend', onScrollEnd);
+          // Double-check after scroll completes
+          const newRect = element.getBoundingClientRect();
+          const newVisibleBottom = container.getBoundingClientRect().bottom - footerHeight;
+          if (newRect.bottom > newVisibleBottom) {
+            // Still not visible, scroll more
+            container.scrollBy({
+              top: newRect.bottom - newVisibleBottom + 20,
+              behavior: 'smooth'
+            });
+          }
+        };
+
+        container.addEventListener('scrollend', onScrollEnd, { once: true });
+        container.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+
+        // Fallback if scrollend not supported or no scroll needed
+        setTimeout(() => {
+          container.removeEventListener('scrollend', onScrollEnd);
+        }, 1000);
+      }
+    });
+  });
 }
 
 // Scroll to show Copy button
