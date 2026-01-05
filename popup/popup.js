@@ -1,8 +1,12 @@
 // Popup UI logic for X Follow Checker
 
-import { t, setLanguage, getLanguage, getAvailableLanguages } from '../utils/i18n.js';
+import { t, setLanguage } from '../utils/i18n.js';
 import * as storage from '../utils/storage.js';
 import { saveQueryIds } from '../utils/api.js';
+import { scrollToShowElement } from './scroll.js';
+import { normalizeUsername, setInputValue, updateInputClearState } from './input-utils.js';
+import { escapeHtml, csvEscape } from './formatters.js';
+import { getErrorTitle, getErrorMessage } from './errors.js';
 
 // DOM Elements
 const elements = {
@@ -59,6 +63,7 @@ let isChecking = false;
 let lastInputUsername = '';
 let popupStateSaveTimer = null;
 let isRestoringState = false;
+let lastErrorInfo = null;
 
 // Initialize
 console.log('[Popup] Script loaded');
@@ -173,8 +178,7 @@ function setupEventListeners() {
 
   // Clear input button
   elements.clearInputBtn.addEventListener('click', async () => {
-    elements.screenNameInput.value = '';
-    updateInputClearState();
+    setScreenNameValue('');
     hideRecentDropdown();
     handleUsernameInputChange('');
     await updateUI();
@@ -226,7 +230,7 @@ function setupEventListeners() {
     const inputValue = rawValue.trim();
     handleUsernameInputChange(normalizeUsername(rawValue));
     showRecentDropdown(rawValue);
-    updateInputClearState();
+    updateInputClearState(elements.inputGroup, elements.screenNameInput);
 
     if (!inputValue) {
       // Hide results if input is cleared
@@ -311,15 +315,14 @@ async function loadRecentUsernames() {
     console.log('[RecentUsernames] Last selected username:', lastSelected);
 
     if (lastSelected) {
-      elements.screenNameInput.value = lastSelected;
+      setScreenNameValue(lastSelected);
       console.log('[RecentUsernames] Pre-filled input with last selected:', lastSelected);
     } else if (recentUsernames.length > 0) {
-      elements.screenNameInput.value = recentUsernames[0];
+      setScreenNameValue(recentUsernames[0]);
       console.log('[RecentUsernames] Pre-filled input with most recent:', recentUsernames[0]);
     }
   }
-
-  updateInputClearState();
+  updateInputClearState(elements.inputGroup, elements.screenNameInput);
 }
 
 function showRecentDropdown(filterText = '') {
@@ -364,11 +367,10 @@ function selectCurrentItem() {
   if (selectedIndex >= 0 && selectedIndex < items.length) {
     const username = items[selectedIndex].dataset.username;
     console.log('[Keyboard] Selected username:', username);
-    elements.screenNameInput.value = username;
+    setScreenNameValue(username);
     hideRecentDropdown();
 
     handleUsernameInputChange(normalizeUsername(username));
-    updateInputClearState();
 
     // Save as last selected username
     storage.setLastSelectedUsername(username);
@@ -406,11 +408,10 @@ function renderRecentList(usernames) {
 
       const selectedUsername = item.dataset.username;
       console.log('[RecentList] Clicked on username:', selectedUsername);
-      elements.screenNameInput.value = selectedUsername;
+      setScreenNameValue(selectedUsername);
       hideRecentDropdown();
 
       handleUsernameInputChange(normalizeUsername(selectedUsername));
-      updateInputClearState();
 
       // Save as last selected username
       storage.setLastSelectedUsername(selectedUsername);
@@ -443,7 +444,7 @@ function renderRecentList(usernames) {
       // Clear input and results if deleted username was current
       const currentInput = elements.screenNameInput.value.trim().toLowerCase();
       if (currentInput === usernameToDelete.toLowerCase()) {
-        elements.screenNameInput.value = '';
+        setScreenNameValue('');
         currentResults = null;
         hideAllSections();
         showSection(elements.emptyState);
@@ -461,7 +462,7 @@ function renderRecentList(usernames) {
 
 // Show cached results immediately if available for this username
 async function showResultsIfCached(username) {
-  const normalizedInput = username.toLowerCase().replace('@', '');
+  const normalizedInput = normalizeUsername(username);
 
   console.log('[Cache] showResultsIfCached called with:', username);
   console.log('[Cache] normalizedInput:', normalizedInput);
@@ -485,14 +486,9 @@ async function showResultsIfCached(username) {
   }
 }
 
-function normalizeUsername(value) {
-  return value.trim().replace('@', '').toLowerCase();
-}
-
-function updateInputClearState() {
-  if (!elements.inputGroup) return;
-  const hasValue = elements.screenNameInput.value.trim().length > 0;
-  elements.inputGroup.classList.toggle('has-value', hasValue);
+function setScreenNameValue(value, options = {}) {
+  setInputValue(elements.screenNameInput, value, options);
+  updateInputClearState(elements.inputGroup, elements.screenNameInput);
 }
 
 function handleUsernameInputChange(normalizedUsername) {
@@ -566,9 +562,10 @@ async function restorePopupState() {
   }
 
   if (!inputUsername) {
-    elements.screenNameInput.value = state.screenName;
+    setScreenNameValue(state.screenName);
+  } else {
+    updateInputClearState(elements.inputGroup, elements.screenNameInput);
   }
-  updateInputClearState();
 
   isRestoringState = true;
   await showResultsIfCached(state.screenName);
@@ -614,10 +611,9 @@ async function handleClearHistory() {
     hideRecentDropdown();
     hideAllSections();
     showSection(elements.emptyState);
-    elements.screenNameInput.value = '';
+    setScreenNameValue('');
     elements.lastCheckInfo.textContent = '';
     lastInputUsername = '';
-    updateInputClearState();
   }
 }
 
@@ -648,11 +644,10 @@ async function handleDetectUsername() {
 
     if (response.success) {
       // Fill in the username
-      elements.screenNameInput.value = response.data.screenName;
+      setScreenNameValue(response.data.screenName);
       console.log('[Detect] Username detected:', response.data.screenName);
 
       handleUsernameInputChange(normalizeUsername(response.data.screenName));
-      updateInputClearState();
       await showResultsIfCached(response.data.screenName);
       schedulePopupStateSave();
 
@@ -711,7 +706,10 @@ async function handleStartCheck() {
   const screenName = elements.screenNameInput.value.trim().replace('@', '');
 
   if (!screenName) {
-    showError('INPUT_REQUIRED', t('usernameRequired'), t('usernameRequiredDesc'));
+    showError('INPUT_REQUIRED', t('usernameRequired'), t('usernameRequiredDesc'), {
+      titleKey: 'usernameRequired',
+      messageKey: 'usernameRequiredDesc'
+    });
     return;
   }
 
@@ -757,11 +755,12 @@ async function handleStartCheck() {
       showError(
         response.error.type,
         getErrorTitle(response.error.type),
-        getErrorMessage(response.error)
+        getErrorMessage(response.error),
+        { error: response.error }
       );
     }
   } catch (error) {
-    showError('error', t('error'), error.message);
+    showError('error', t('error'), error.message, { titleKey: 'error' });
   } finally {
     setCheckingState(false);
     if (cancelled) {
@@ -778,7 +777,6 @@ async function handleContinueCheck() {
 
   // Update button state to show loading
   const continueBtn = elements.continueCheckBtn;
-  const originalText = continueBtn.textContent;
   continueBtn.innerHTML = `<span class="spinner-small"></span>${t('checking')}`;
   continueBtn.disabled = true;
 
@@ -812,14 +810,15 @@ async function handleContinueCheck() {
       showError(
         response.error.type,
         getErrorTitle(response.error.type),
-        getErrorMessage(response.error)
+        getErrorMessage(response.error),
+        { error: response.error }
       );
     }
   } catch (error) {
-    showError('error', t('error'), error.message);
+    showError('error', t('error'), error.message, { titleKey: 'error' });
   } finally {
     setCheckingState(false);
-    continueBtn.textContent = originalText;
+    continueBtn.textContent = t('continueCheck');
     continueBtn.disabled = false;
     if (cancelled) {
       await updateUI();
@@ -872,7 +871,8 @@ function handleProgressUpdate(message) {
       showError(
         message.error.type,
         getErrorTitle(message.error.type),
-        getErrorMessage(message.error)
+        getErrorMessage(message.error),
+        { error: message.error }
       );
       setCheckingState(false);
       break;
@@ -900,24 +900,58 @@ function updateProgress(percent, text) {
   elements.progressText.textContent = text;
 }
 
-function showError(type, title, message) {
-  hideAllSections();
-  showSection(elements.errorSection);
+function showError(type, title, message, options = {}) {
+  lastErrorInfo = {
+    type,
+    title,
+    message,
+    error: options.error || null,
+    titleKey: options.titleKey,
+    messageKey: options.messageKey
+  };
 
-  elements.errorTitle.textContent = title;
-  elements.errorMessage.textContent = message;
+  renderErrorState(lastErrorInfo);
+}
+
+function renderErrorState(state, options = {}) {
+  if (!state) return;
+  const { skipSectionReset = false } = options;
+
+  if (!skipSectionReset) {
+    hideAllSections();
+    showSection(elements.errorSection);
+  } else {
+    elements.errorSection.classList.remove('hidden');
+  }
+
+  const resolvedTitle = state.titleKey
+    ? t(state.titleKey)
+    : state.error
+      ? getErrorTitle(state.error.type || state.type)
+      : (state.title || t('error'));
+
+  const resolvedMessage = state.messageKey
+    ? t(state.messageKey)
+    : state.error
+      ? getErrorMessage(state.error)
+      : (state.message || t('unexpectedError'));
+
+  elements.errorTitle.textContent = resolvedTitle;
+  elements.errorMessage.textContent = resolvedMessage;
 
   // Reset buttons and hint
   elements.errorActionBtn.classList.add('hidden');
   elements.reportIssueBtn.classList.add('hidden');
   elements.errorHint.classList.add('hidden');
 
-  if (type === 'INPUT_REQUIRED') {
+  if (state.type === 'INPUT_REQUIRED') {
     return;
   }
 
+  const effectiveType = state.error?.type || state.type;
+
   // Show action button for specific errors
-  if (type === 'NOT_AUTHENTICATED') {
+  if (effectiveType === 'NOT_AUTHENTICATED') {
     elements.errorActionBtn.textContent = t('openX');
     elements.errorActionBtn.classList.remove('hidden');
     elements.errorActionBtn.onclick = () => {
@@ -926,7 +960,7 @@ function showError(type, title, message) {
     // Show username input reminder
     elements.errorHint.textContent = t('alsoInputUsername');
     elements.errorHint.classList.remove('hidden');
-  } else if (type === 'RATE_LIMITED') {
+  } else if (effectiveType === 'RATE_LIMITED') {
     elements.errorActionBtn.textContent = t('retry');
     elements.errorActionBtn.classList.remove('hidden');
     elements.errorActionBtn.onclick = handleStartCheck;
@@ -939,8 +973,8 @@ function showError(type, title, message) {
     // Show report issue button for unexpected errors
     elements.reportIssueBtn.classList.remove('hidden');
     elements.reportIssueBtn.onclick = () => {
-      const issueTitle = encodeURIComponent(`Error: ${message}`);
-      const issueBody = encodeURIComponent(`**Error Type:** ${type}\n**Error Message:** ${message}\n\n**Steps to reproduce:**\n1. \n\n**Browser:** ${navigator.userAgent}`);
+      const issueTitle = encodeURIComponent(`Error: ${resolvedMessage}`);
+      const issueBody = encodeURIComponent(`**Error Type:** ${effectiveType}\n**Error Message:** ${resolvedMessage}\n\n**Steps to reproduce:**\n1. \n\n**Browser:** ${navigator.userAgent}`);
       chrome.tabs.create({
         url: `https://github.com/huangsen365/x-follow-checker/issues/new?title=${issueTitle}&body=${issueBody}`
       });
@@ -948,35 +982,11 @@ function showError(type, title, message) {
   }
 }
 
-function getErrorTitle(errorType) {
-  const titles = {
-    NOT_AUTHENTICATED: t('notLoggedIn'),
-    RATE_LIMITED: t('rateLimited'),
-    NETWORK_ERROR: t('networkError')
-  };
-  return titles[errorType] || t('error');
-}
-
-function getErrorMessage(error) {
-  if (!error) return t('unexpectedError');
-
-  switch (error.type) {
-    case 'NOT_AUTHENTICATED':
-      return t('notLoggedInDesc');
-    case 'RATE_LIMITED':
-      return t('rateLimitedDesc');
-    case 'NETWORK_ERROR':
-      return t('networkErrorDesc');
-    default:
-      return error.message || t('unexpectedError');
-  }
-}
-
 function handleStatsClick(event) {
   if (!currentResults) return;
   const filter = event.currentTarget.dataset.filter || 'all';
   setFilter(filter);
-  scrollToShowElement(elements.userList);
+  scrollToShowElement(elements.userList, elements.content);
 }
 
 function showResults() {
@@ -1106,12 +1116,6 @@ function renderUserList() {
   });
 }
 
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
 async function loadCachedResults() {
   console.log('[LoadCache] Loading cached results...');
   try {
@@ -1168,9 +1172,10 @@ async function checkRunningStatus() {
         // Restore the username being checked (override any pre-filled value)
         const checkingUsername = response.data.screenName || response.data.user?.screenName;
         if (checkingUsername) {
-          elements.screenNameInput.value = checkingUsername;
+          setScreenNameValue(checkingUsername);
+        } else {
+          updateInputClearState(elements.inputGroup, elements.screenNameInput);
         }
-        updateInputClearState();
 
         // Show current progress if available
         const progress = response.data.progress;
@@ -1202,9 +1207,10 @@ async function checkRunningStatus() {
         // Restore the username from results
         if (currentResults.user?.screenName) {
           if (!elements.screenNameInput.value) {
-            elements.screenNameInput.value = currentResults.user.screenName;
+            setScreenNameValue(currentResults.user.screenName);
+          } else {
+            updateInputClearState(elements.inputGroup, elements.screenNameInput);
           }
-          updateInputClearState();
           // Save username to history
           await storage.addRecentUsername(currentResults.user.screenName);
           recentUsernames = await storage.getRecentUsernames();
@@ -1214,7 +1220,8 @@ async function checkRunningStatus() {
         showError(
           response.data.error.type,
           getErrorTitle(response.data.error.type),
-          getErrorMessage(response.data.error)
+          getErrorMessage(response.data.error),
+          { error: response.data.error }
         );
       }
     }
@@ -1269,15 +1276,6 @@ function exportData(format) {
   URL.revokeObjectURL(url);
 }
 
-function csvEscape(value) {
-  if (value === null || value === undefined) return '';
-  const stringValue = String(value);
-  if (/[",\n\r]/.test(stringValue)) {
-    return `"${stringValue.replace(/"/g, '""')}"`;
-  }
-  return stringValue;
-}
-
 function hideAllSections() {
   elements.progressSection.classList.add('hidden');
   elements.errorSection.classList.add('hidden');
@@ -1314,6 +1312,33 @@ function updateTranslations() {
     const key = el.dataset.i18n;
     el.textContent = t(key);
   });
+  refreshDynamicText();
+}
+
+function refreshDynamicText() {
+  refreshLimitWarningText();
+  refreshErrorText();
+  refreshGoPostHint();
+}
+
+function refreshLimitWarningText() {
+  if (!currentResults?.hitLimit) return;
+  elements.limitWarningText.textContent = t('limitReached');
+  elements.limitWarningLink.textContent = t('requestMoreQuota');
+  if (!elements.continueCheckBtn.classList.contains('hidden')) {
+    elements.continueCheckBtn.textContent = t('continueCheck');
+  }
+}
+
+function refreshErrorText() {
+  if (!lastErrorInfo) return;
+  if (elements.errorSection.classList.contains('hidden')) return;
+  renderErrorState(lastErrorInfo, { skipSectionReset: true });
+}
+
+function refreshGoPostHint() {
+  if (elements.goPostHint.classList.contains('hidden')) return;
+  showGoPostHint(false);
 }
 
 // Draft Message Functions
@@ -1343,84 +1368,9 @@ function showDraftSection(draftText = null, shouldScroll = true, shouldFocus = t
   schedulePopupStateSave();
 }
 
-// Smart scroll function - waits for layout then scrolls element into view above footer
-function scrollToShowElement(element, attempts = 0) {
-  const maxAttempts = 3;
-  if (!element || !element.isConnected) return;
-
-  // Wait for next frame to ensure layout is complete
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      const container = elements.content || document.querySelector('.content');
-      if (!container) return;
-
-      const padding = 16;
-      const elementRect = element.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
-
-      const visibleBottom = containerRect.bottom - padding;
-      const elementBottom = elementRect.bottom;
-
-      if (elementBottom <= visibleBottom) {
-        return;
-      }
-
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const behavior = prefersReducedMotion ? 'auto' : 'smooth';
-      const scrollAmount = elementBottom - visibleBottom;
-
-      container.scrollBy({ top: scrollAmount, behavior });
-
-      if (attempts >= maxAttempts) {
-        return;
-      }
-
-      waitForScrollEnd(container, () => {
-        scrollToShowElement(element, attempts + 1);
-      });
-    });
-  });
-}
-
-function waitForScrollEnd(container, callback) {
-  let idleTimeoutId = null;
-  let fallbackTimeoutId = null;
-
-  const cleanup = () => {
-    if (idleTimeoutId) {
-      clearTimeout(idleTimeoutId);
-    }
-    if (fallbackTimeoutId) {
-      clearTimeout(fallbackTimeoutId);
-    }
-    container.removeEventListener('scroll', onScroll);
-    container.removeEventListener('scrollend', onScrollEnd);
-  };
-
-  const onScrollEnd = () => {
-    cleanup();
-    callback();
-  };
-
-  const onScroll = () => {
-    if (idleTimeoutId) {
-      clearTimeout(idleTimeoutId);
-    }
-    idleTimeoutId = setTimeout(onScrollEnd, 120);
-  };
-
-  if ('onscrollend' in container) {
-    container.addEventListener('scrollend', onScrollEnd, { once: true });
-  } else {
-    container.addEventListener('scroll', onScroll);
-  }
-
-  fallbackTimeoutId = setTimeout(onScrollEnd, 240);
-}
-
 // Scroll to show Copy button
 function scrollToShowCopyButton() {
-  scrollToShowElement(elements.copyMessageBtn);
+  scrollToShowElement(elements.copyMessageBtn, elements.content);
 }
 
 function hideDraftSection() {
@@ -1435,7 +1385,7 @@ function showGoPostHint(shouldScroll = true) {
   elements.goPostHint.classList.remove('hidden');
 
   if (shouldScroll) {
-    scrollToShowElement(elements.goPostHint);
+    scrollToShowElement(elements.goPostHint, elements.content);
   }
 }
 
