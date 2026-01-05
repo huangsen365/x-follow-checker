@@ -24,6 +24,12 @@ body {
   overflow-y: auto;
 }
 
+/* Expanded height when limit warning is visible (1000+ users) */
+body.limit-warning-visible,
+.container.limit-warning-visible {
+  max-height: 680px;
+}
+
 .hidden {
   display: none !important;
 }

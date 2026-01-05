@@ -523,7 +523,7 @@ async function handleStartCheck() {
   const screenName = elements.screenNameInput.value.trim().replace('@', '');
 
   if (!screenName) {
-    showError('NOT_AUTHENTICATED', t('notLoggedIn'), t('notLoggedInDesc'));
+    showError('INPUT_REQUIRED', t('usernameRequired'), t('usernameRequiredDesc'));
     return;
   }
 
@@ -533,6 +533,7 @@ async function handleStartCheck() {
     // Stop current check
     chrome.runtime.sendMessage({ type: 'STOP_CHECK' });
     setCheckingState(false);
+    await updateUI();
     return;
   }
 
@@ -548,6 +549,8 @@ async function handleStartCheck() {
   showSection(elements.progressSection);
   updateProgress(5, t('loading'));
 
+  let cancelled = false;
+
   try {
     const response = await chrome.runtime.sendMessage({
       type: 'START_CHECK',
@@ -560,6 +563,8 @@ async function handleStartCheck() {
       await storage.addRecentUsername(screenName);
       recentUsernames = await storage.getRecentUsernames();
       showResults();
+    } else if (response.error?.message === 'Check cancelled') {
+      cancelled = true;
     } else {
       showError(
         response.error.type,
@@ -571,6 +576,9 @@ async function handleStartCheck() {
     showError('error', t('error'), error.message);
   } finally {
     setCheckingState(false);
+    if (cancelled) {
+      await updateUI();
+    }
   }
 }
 
@@ -595,6 +603,8 @@ async function handleContinueCheck() {
   showSection(elements.progressSection);
   updateProgress(5, t('continuingFrom', { count: existingCount }));
 
+  let cancelled = false;
+
   try {
     // Get current username from input or cached results
     const username = elements.screenNameInput.value.trim().replace('@', '') ||
@@ -608,6 +618,8 @@ async function handleContinueCheck() {
     if (response.success) {
       currentResults = response.data;
       showResults();
+    } else if (response.error?.message === 'Check cancelled') {
+      cancelled = true;
     } else {
       showError(
         response.error.type,
@@ -621,6 +633,9 @@ async function handleContinueCheck() {
     setCheckingState(false);
     continueBtn.textContent = originalText;
     continueBtn.disabled = false;
+    if (cancelled) {
+      await updateUI();
+    }
   }
 }
 
@@ -709,6 +724,10 @@ function showError(type, title, message) {
   elements.reportIssueBtn.classList.add('hidden');
   elements.errorHint.classList.add('hidden');
 
+  if (type === 'INPUT_REQUIRED') {
+    return;
+  }
+
   // Show action button for specific errors
   if (type === 'NOT_AUTHENTICATED') {
     elements.errorActionBtn.textContent = t('openX');
@@ -786,9 +805,17 @@ I need to check more than 1,000 following users.
 `);
     elements.limitWarningLink.href = `https://github.com/huangsen365/x-follow-checker/issues/new?title=${issueTitle}&body=${issueBody}`;
     elements.limitWarning.classList.remove('hidden');
+
+    // Expand popup height to accommodate warning
+    document.body.classList.add('limit-warning-visible');
+    document.querySelector('.container').classList.add('limit-warning-visible');
   } else {
     elements.limitWarning.classList.add('hidden');
     elements.continueCheckBtn.classList.add('hidden');
+
+    // Restore normal popup height
+    document.body.classList.remove('limit-warning-visible');
+    document.querySelector('.container').classList.remove('limit-warning-visible');
   }
 
   // Update stats
@@ -797,7 +824,7 @@ I need to check more than 1,000 following users.
   elements.notFollowingCount.textContent = currentResults.stats.notFollowingBackCount;
 
   // Update last check info
-  const lastCheck = new Date();
+  const lastCheck = currentResults.timestamp ? new Date(currentResults.timestamp) : new Date();
   elements.lastCheckInfo.textContent = t('lastChecked', {
     time: lastCheck.toLocaleString()
   });
@@ -991,13 +1018,13 @@ function exportData(format) {
   if (format === 'csv') {
     const headers = ['Screen Name', 'Display Name', 'Follows Back', 'Verified'];
     const rows = users.map(u => [
-      u.screenName,
-      u.name.replace(/,/g, ' '),
-      u.followedBy ? 'Yes' : 'No',
-      u.verified ? 'Yes' : 'No'
+      csvEscape(u.screenName),
+      csvEscape(u.name),
+      csvEscape(u.followedBy ? 'Yes' : 'No'),
+      csvEscape(u.verified ? 'Yes' : 'No')
     ]);
 
-    content = [headers, ...rows].map(row => row.join(',')).join('\n');
+    content = [headers.map(csvEscape), ...rows].map(row => row.join(',')).join('\n');
     filename = `x-follow-check-${currentFilter}-${Date.now()}.csv`;
     mimeType = 'text/csv';
   } else {
@@ -1021,6 +1048,15 @@ function exportData(format) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+function csvEscape(value) {
+  if (value === null || value === undefined) return '';
+  const stringValue = String(value);
+  if (/[",\n\r]/.test(stringValue)) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  }
+  return stringValue;
 }
 
 function hideAllSections() {

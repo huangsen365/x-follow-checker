@@ -86,7 +86,7 @@ async function startCheck(screenName) {
 
     // Get current user info
     sendProgress({ status: 'getting_user_info' });
-    const currentUser = await getUserByScreenName(screenName, tokens.csrfToken);
+    const currentUser = await getUserByScreenName(screenName, tokens.csrfToken, abortController.signal);
     currentCheck.userId = currentUser.id;
     currentCheck.user = currentUser;
 

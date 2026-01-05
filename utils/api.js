@@ -131,12 +131,13 @@ function buildHeaders(csrfToken) {
 }
 
 // Make API request with error handling
-async function apiRequest(url, csrfToken) {
+async function apiRequest(url, csrfToken, signal) {
   try {
     const response = await fetch(url, {
       method: 'GET',
       headers: buildHeaders(csrfToken),
-      credentials: 'include'
+      credentials: 'include',
+      signal
     });
 
     if (response.status === 401 || response.status === 403) {
@@ -191,6 +192,9 @@ async function apiRequest(url, csrfToken) {
     if (error instanceof XApiError) {
       throw error;
     }
+    if (error?.name === 'AbortError') {
+      throw new XApiError(ErrorTypes.API_ERROR, 'Check cancelled');
+    }
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new XApiError(
         ErrorTypes.NETWORK_ERROR,
@@ -205,7 +209,7 @@ async function apiRequest(url, csrfToken) {
 }
 
 // Get current user info by screen name
-export async function getUserByScreenName(screenName, csrfToken) {
+export async function getUserByScreenName(screenName, csrfToken, signal) {
   const variables = {
     screen_name: screenName,
     withSafetyModeUserFields: true
@@ -237,7 +241,7 @@ export async function getUserByScreenName(screenName, csrfToken) {
   const queryId = queryIds.UserByScreenName;
   const url = `https://x.com/i/api/graphql/${queryId}/UserByScreenName?${params}`;
 
-  const data = await apiRequest(url, csrfToken);
+  const data = await apiRequest(url, csrfToken, signal);
 
   // Handle different response structures
   let userResult = data?.data?.user?.result;
@@ -262,7 +266,7 @@ export async function getUserByScreenName(screenName, csrfToken) {
 }
 
 // Fetch following list page
-export async function fetchFollowingPage(userId, cursor, csrfToken) {
+export async function fetchFollowingPage(userId, cursor, csrfToken, signal) {
   const variables = {
     userId: userId,
     count: 20,
@@ -284,7 +288,7 @@ export async function fetchFollowingPage(userId, cursor, csrfToken) {
   const queryId = queryIds.Following;
   const url = `https://x.com/i/api/graphql/${queryId}/Following?${params}`;
 
-  return await apiRequest(url, csrfToken);
+  return await apiRequest(url, csrfToken, signal);
 }
 
 // Parse following response to extract users and cursor
@@ -356,7 +360,7 @@ export async function fetchAllFollowing(userId, csrfToken, onProgress, signal, s
       break;
     }
 
-    const response = await fetchFollowingPage(userId, cursor, csrfToken);
+    const response = await fetchFollowingPage(userId, cursor, csrfToken, signal);
     const { users, nextCursor } = parseFollowingResponse(response);
 
     allUsers.push(...users);
@@ -407,7 +411,7 @@ function delay(ms) {
 }
 
 // Get current logged-in user
-export async function getCurrentUser(csrfToken) {
+export async function getCurrentUser(csrfToken, signal) {
   const variables = {
     withCommunitiesMemberships: false,
     withSubscribedTab: false,
@@ -431,7 +435,7 @@ export async function getCurrentUser(csrfToken) {
   const queryId = queryIds.Viewer;
   const url = `https://x.com/i/api/graphql/${queryId}/Viewer?${params}`;
 
-  const data = await apiRequest(url, csrfToken);
+  const data = await apiRequest(url, csrfToken, signal);
 
   const viewer = data?.data?.viewer?.user_results?.result;
 

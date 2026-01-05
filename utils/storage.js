@@ -148,6 +148,7 @@ export async function addRecentUsername(username) {
   const limited = filtered.slice(0, MAX_USERNAME_HISTORY);
 
   await set(STORAGE_KEYS.USERNAME_HISTORY, limited);
+  await cleanupCachedResults();
 }
 
 export async function clearUsernameHistory() {
