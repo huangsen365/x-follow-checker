@@ -705,12 +705,17 @@ async function checkForUpdates() {
 
     const data = await response.json();
     console.log('[VersionCheck] API response data:', JSON.stringify(data, null, 2));
+    console.log('[VersionCheck] isLatest value:', data.isLatest, 'type:', typeof data.isLatest);
+    console.log('[VersionCheck] downloadUrl value:', data.downloadUrl);
 
-    if (data.isLatest) {
+    if (data.isLatest === true) {
       // Already on latest version
-      console.log('[VersionCheck] Already on latest version');
-      elements.versionInfo.textContent = `v${currentVersion} ${t('latestVersion')}`;
+      console.log('[VersionCheck] Already on latest version - showing (latest)');
+      const latestText = t('latestVersion');
+      console.log('[VersionCheck] latestVersion translation:', latestText);
+      elements.versionInfo.textContent = `v${currentVersion} ${latestText}`;
       elements.versionInfo.classList.add('version-latest');
+      console.log('[VersionCheck] versionInfo text now:', elements.versionInfo.textContent);
     } else if (data.downloadUrl) {
       // New version available - show update link
       console.log('[VersionCheck] New version available:', data.latestVersion);
@@ -720,7 +725,8 @@ async function checkForUpdates() {
       elements.updateLink.href = data.downloadUrl;
       elements.updateLink.classList.remove('hidden');
     } else {
-      console.log('[VersionCheck] Unexpected response - no isLatest or downloadUrl');
+      console.log('[VersionCheck] isLatest is not true and no downloadUrl');
+      console.log('[VersionCheck] This means isLatest =', data.isLatest);
     }
 
     console.log('[VersionCheck] Completed successfully');
