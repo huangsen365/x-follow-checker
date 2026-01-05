@@ -178,10 +178,15 @@ function setupEventListeners() {
   // Filter recent list as user types, and update UI when input changes
   elements.screenNameInput.addEventListener('input', (e) => {
     showRecentDropdown(e.target.value);
-    // Hide results if input is cleared
-    if (!e.target.value.trim()) {
+    const inputValue = e.target.value.trim();
+
+    if (!inputValue) {
+      // Hide results if input is cleared
       hideAllSections();
       showSection(elements.emptyState);
+    } else {
+      // Check if typed username matches cached results
+      showResultsIfCached(inputValue);
     }
   });
 
@@ -296,11 +301,30 @@ function renderRecentList(usernames) {
   // Add click handlers
   elements.recentList.querySelectorAll('.recent-item').forEach(item => {
     item.addEventListener('click', () => {
-      elements.screenNameInput.value = item.dataset.username;
+      const selectedUsername = item.dataset.username;
+      elements.screenNameInput.value = selectedUsername;
       hideRecentDropdown();
-      elements.screenNameInput.focus();
+
+      // Check if we have cached results for this username - show immediately if match
+      showResultsIfCached(selectedUsername);
     });
   });
+}
+
+// Show cached results immediately if username matches, otherwise show empty state
+function showResultsIfCached(username) {
+  const normalizedInput = username.toLowerCase().replace('@', '');
+  const cachedUsername = currentResults?.user?.screenName?.toLowerCase();
+
+  if (cachedUsername && cachedUsername === normalizedInput) {
+    // Username matches cached results - show them immediately
+    console.log('[Cache] Showing cached results for:', username);
+    showResults();
+  } else {
+    // No matching cache - show empty state
+    hideAllSections();
+    showSection(elements.emptyState);
+  }
 }
 
 async function handleClearHistory() {
@@ -702,13 +726,13 @@ function showSection(section) {
 function updateUI() {
   hideAllSections();
 
-  const screenName = elements.screenNameInput.value.trim().replace('@', '');
+  const screenName = elements.screenNameInput.value.trim();
 
-  // Only show results if there's a username in the input
-  if (currentResults && screenName) {
-    showResults();
-  } else {
+  if (!screenName) {
     showSection(elements.emptyState);
+  } else {
+    // Show cached results only if username matches
+    showResultsIfCached(screenName);
   }
 }
 
