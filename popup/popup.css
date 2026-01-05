@@ -519,3 +519,29 @@ body {
 .user-list::-webkit-scrollbar-thumb:hover {
   background: #8899a6;
 }
+
+/* Footer */
+.footer {
+  padding: 10px 16px;
+  border-top: 1px solid #eff3f4;
+  text-align: center;
+  background: #f7f9f9;
+}
+
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #536471;
+  text-decoration: none;
+  font-size: 12px;
+  transition: color 0.2s;
+}
+
+.github-link:hover {
+  color: #0f1419;
+}
+
+.github-icon {
+  opacity: 0.8;
+}
