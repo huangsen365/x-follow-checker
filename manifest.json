@@ -11,7 +11,8 @@
 
   "host_permissions": [
     "https://x.com/*",
-    "https://twitter.com/*"
+    "https://twitter.com/*",
+    "https://version-check.x-follow-checker.com/*"
   ],
 
   "background": {
