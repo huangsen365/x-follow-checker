@@ -35,7 +35,11 @@ const translations = {
     users: 'users',
     exportSuccess: 'Export successful!',
     exportFailed: 'Export failed',
-    confirmStop: 'Stop the current check?'
+    confirmStop: 'Stop the current check?',
+    recentUsernames: 'Recent',
+    clearHistory: 'Clear History',
+    clearHistoryConfirm: 'Clear all username history?',
+    noHistory: 'No recent usernames'
   },
   zh: {
     appTitle: 'X 互关检测助手',
@@ -71,7 +75,11 @@ const translations = {
     users: '位用户',
     exportSuccess: '导出成功！',
     exportFailed: '导出失败',
-    confirmStop: '确定停止当前检测吗？'
+    confirmStop: '确定停止当前检测吗？',
+    recentUsernames: '最近使用',
+    clearHistory: '清除记录',
+    clearHistoryConfirm: '确定清除所有用户名记录吗？',
+    noHistory: '暂无记录'
   }
 };
 

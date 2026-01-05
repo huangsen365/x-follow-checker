@@ -19,15 +19,25 @@
 
     <!-- Input Section -->
     <section class="input-section">
-      <div class="input-group">
-        <span class="input-prefix">@</span>
-        <input
-          type="text"
-          id="screenNameInput"
-          class="screen-name-input"
-          placeholder="your_username"
-          autocomplete="off"
-        >
+      <div class="input-wrapper">
+        <div class="input-group">
+          <span class="input-prefix">@</span>
+          <input
+            type="text"
+            id="screenNameInput"
+            class="screen-name-input"
+            placeholder="your_username"
+            autocomplete="off"
+          >
+        </div>
+        <!-- Recent Usernames Dropdown -->
+        <div id="recentDropdown" class="recent-dropdown hidden">
+          <div class="recent-header" data-i18n="recentUsernames">Recent</div>
+          <div id="recentList" class="recent-list">
+            <!-- Recent usernames rendered here -->
+          </div>
+          <button id="clearHistoryBtn" class="btn-clear" data-i18n="clearHistory">Clear History</button>
+        </div>
       </div>
       <button id="startBtn" class="btn btn-primary">
         <span class="btn-text" data-i18n="startCheck">Start Check</span>

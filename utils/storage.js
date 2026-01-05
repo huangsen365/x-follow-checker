@@ -4,7 +4,8 @@ const STORAGE_KEYS = {
   LANGUAGE: 'language',
   LAST_CHECK: 'lastCheck',
   CACHED_RESULTS: 'cachedResults',
-  CHECKPOINT: 'checkpoint'
+  CHECKPOINT: 'checkpoint',
+  USERNAME_HISTORY: 'usernameHistory'
 };
 
 export async function get(key) {
@@ -70,6 +71,34 @@ export async function getCheckpoint() {
 
 export async function clearCheckpoint() {
   await remove(STORAGE_KEYS.CHECKPOINT);
+}
+
+// Username history functions
+const MAX_USERNAME_HISTORY = 10;
+
+export async function getRecentUsernames() {
+  return (await get(STORAGE_KEYS.USERNAME_HISTORY)) || [];
+}
+
+export async function addRecentUsername(username) {
+  if (!username) return;
+
+  const history = await getRecentUsernames();
+
+  // Remove if already exists (to move to top)
+  const filtered = history.filter(u => u.toLowerCase() !== username.toLowerCase());
+
+  // Add to beginning
+  filtered.unshift(username);
+
+  // Limit to max
+  const limited = filtered.slice(0, MAX_USERNAME_HISTORY);
+
+  await set(STORAGE_KEYS.USERNAME_HISTORY, limited);
+}
+
+export async function clearUsernameHistory() {
+  await remove(STORAGE_KEYS.USERNAME_HISTORY);
 }
 
 export { STORAGE_KEYS };

@@ -8,6 +8,9 @@ const elements = {
   langSelect: null,
   screenNameInput: null,
   startBtn: null,
+  recentDropdown: null,
+  recentList: null,
+  clearHistoryBtn: null,
   progressSection: null,
   progressFill: null,
   progressText: null,
@@ -36,6 +39,7 @@ let isChecking = false;
 document.addEventListener('DOMContentLoaded', async () => {
   initElements();
   await initLanguage();
+  await loadRecentUsernames();
   await loadCachedResults();
   setupEventListeners();
   updateUI();
@@ -45,6 +49,9 @@ function initElements() {
   elements.langSelect = document.getElementById('langSelect');
   elements.screenNameInput = document.getElementById('screenNameInput');
   elements.startBtn = document.getElementById('startBtn');
+  elements.recentDropdown = document.getElementById('recentDropdown');
+  elements.recentList = document.getElementById('recentList');
+  elements.clearHistoryBtn = document.getElementById('clearHistoryBtn');
   elements.progressSection = document.getElementById('progressSection');
   elements.progressFill = document.getElementById('progressFill');
   elements.progressText = document.getElementById('progressText');
@@ -86,9 +93,23 @@ function setupEventListeners() {
   // Enter key in input
   elements.screenNameInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !isChecking) {
+      hideRecentDropdown();
       handleStartCheck();
     }
   });
+
+  // Show recent dropdown on input focus
+  elements.screenNameInput.addEventListener('focus', showRecentDropdown);
+
+  // Hide dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.input-wrapper')) {
+      hideRecentDropdown();
+    }
+  });
+
+  // Clear history button
+  elements.clearHistoryBtn.addEventListener('click', handleClearHistory);
 
   // Export buttons
   elements.exportCsvBtn.addEventListener('click', () => exportData('csv'));
@@ -110,6 +131,52 @@ function setupEventListeners() {
   });
 }
 
+// Recent usernames state
+let recentUsernames = [];
+
+async function loadRecentUsernames() {
+  recentUsernames = await storage.getRecentUsernames();
+  // Pre-fill with most recent username
+  if (recentUsernames.length > 0 && !elements.screenNameInput.value) {
+    elements.screenNameInput.value = recentUsernames[0];
+  }
+}
+
+function showRecentDropdown() {
+  if (recentUsernames.length === 0) return;
+  renderRecentList();
+  elements.recentDropdown.classList.remove('hidden');
+}
+
+function hideRecentDropdown() {
+  elements.recentDropdown.classList.add('hidden');
+}
+
+function renderRecentList() {
+  elements.recentList.innerHTML = recentUsernames.map(username => `
+    <div class="recent-item" data-username="${username}">
+      <span class="recent-item-text">${username}</span>
+    </div>
+  `).join('');
+
+  // Add click handlers
+  elements.recentList.querySelectorAll('.recent-item').forEach(item => {
+    item.addEventListener('click', () => {
+      elements.screenNameInput.value = item.dataset.username;
+      hideRecentDropdown();
+      elements.screenNameInput.focus();
+    });
+  });
+}
+
+async function handleClearHistory() {
+  if (confirm(t('clearHistoryConfirm'))) {
+    await storage.clearUsernameHistory();
+    recentUsernames = [];
+    hideRecentDropdown();
+  }
+}
+
 async function handleStartCheck() {
   const screenName = elements.screenNameInput.value.trim().replace('@', '');
 
@@ -117,6 +184,8 @@ async function handleStartCheck() {
     showError('error', t('notLoggedIn'), t('notLoggedInDesc'));
     return;
   }
+
+  hideRecentDropdown();
 
   if (isChecking) {
     // Stop current check
@@ -138,6 +207,9 @@ async function handleStartCheck() {
 
     if (response.success) {
       currentResults = response.data;
+      // Save username to history on successful check
+      await storage.addRecentUsername(screenName);
+      recentUsernames = await storage.getRecentUsernames();
       showResults();
     } else {
       showError(

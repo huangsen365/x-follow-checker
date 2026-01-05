@@ -100,6 +100,88 @@ body {
   color: #8899a6;
 }
 
+/* Input Wrapper for dropdown positioning */
+.input-wrapper {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.input-wrapper .input-group {
+  margin-bottom: 0;
+}
+
+/* Recent Usernames Dropdown */
+.recent-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #cfd9de;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  max-height: 200px;
+  overflow: hidden;
+}
+
+.recent-header {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #536471;
+  background: #f7f9f9;
+  border-bottom: 1px solid #eff3f4;
+}
+
+.recent-list {
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.recent-item:hover {
+  background: #f7f9f9;
+}
+
+.recent-item-text {
+  flex: 1;
+  font-size: 14px;
+  color: #0f1419;
+}
+
+.recent-item-text::before {
+  content: '@';
+  color: #536471;
+}
+
+/* Clear History Button */
+.btn-clear {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-top: 1px solid #eff3f4;
+  background: transparent;
+  font-size: 13px;
+  color: #f4212e;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s;
+}
+
+.btn-clear:hover {
+  background: #fff1f2;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
