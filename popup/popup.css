@@ -148,8 +148,13 @@ body {
   transition: background-color 0.15s;
 }
 
-.recent-item:hover {
+.recent-item:hover,
+.recent-item.selected {
   background: #f7f9f9;
+}
+
+.recent-item.selected {
+  background: #e8f5fd;
 }
 
 .recent-item-text {

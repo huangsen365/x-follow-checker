@@ -90,11 +90,33 @@ function setupEventListeners() {
   // Start check button
   elements.startBtn.addEventListener('click', handleStartCheck);
 
-  // Enter key in input
-  elements.screenNameInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !isChecking) {
+  // Keyboard navigation for recent list
+  elements.screenNameInput.addEventListener('keydown', (e) => {
+    const dropdown = elements.recentDropdown;
+    const isDropdownVisible = !dropdown.classList.contains('hidden');
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (isDropdownVisible) {
+        navigateRecentList(1);
+      } else {
+        showRecentDropdown(elements.screenNameInput.value);
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (isDropdownVisible) {
+        navigateRecentList(-1);
+      }
+    } else if (e.key === 'Enter') {
+      if (isDropdownVisible && selectedIndex >= 0) {
+        e.preventDefault();
+        selectCurrentItem();
+      } else if (!isChecking) {
+        hideRecentDropdown();
+        handleStartCheck();
+      }
+    } else if (e.key === 'Escape') {
       hideRecentDropdown();
-      handleStartCheck();
     }
   });
 
@@ -140,6 +162,7 @@ function setupEventListeners() {
 
 // Recent usernames state
 let recentUsernames = [];
+let selectedIndex = -1; // For keyboard navigation
 
 async function loadRecentUsernames() {
   recentUsernames = await storage.getRecentUsernames();
@@ -158,12 +181,40 @@ function showRecentDropdown(filterText = '') {
     return;
   }
 
+  selectedIndex = -1; // Reset selection
   renderRecentList(filtered);
   elements.recentDropdown.classList.remove('hidden');
 }
 
 function hideRecentDropdown() {
   elements.recentDropdown.classList.add('hidden');
+  selectedIndex = -1;
+}
+
+function navigateRecentList(direction) {
+  const items = elements.recentList.querySelectorAll('.recent-item');
+  if (items.length === 0) return;
+
+  // Remove current selection
+  items.forEach(item => item.classList.remove('selected'));
+
+  // Calculate new index
+  selectedIndex += direction;
+  if (selectedIndex < 0) selectedIndex = items.length - 1;
+  if (selectedIndex >= items.length) selectedIndex = 0;
+
+  // Add selection to new item
+  items[selectedIndex].classList.add('selected');
+  items[selectedIndex].scrollIntoView({ block: 'nearest' });
+}
+
+function selectCurrentItem() {
+  const items = elements.recentList.querySelectorAll('.recent-item');
+  if (selectedIndex >= 0 && selectedIndex < items.length) {
+    const username = items[selectedIndex].dataset.username;
+    elements.screenNameInput.value = username;
+    hideRecentDropdown();
+  }
 }
 
 function filterRecentUsernames(filterText) {
