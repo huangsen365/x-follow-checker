@@ -48,6 +48,10 @@ async function handleMessage(request, sender) {
     case 'DETECT_USERNAME':
       return await detectUsername();
 
+    case 'USER_LOGGED_IN':
+      // Content script notifies when user is logged in - acknowledge silently
+      return { success: true };
+
     default:
       throw new Error(`Unknown message type: ${request.type}`);
   }
