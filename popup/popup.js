@@ -99,7 +99,14 @@ function setupEventListeners() {
   });
 
   // Show recent dropdown on input focus
-  elements.screenNameInput.addEventListener('focus', showRecentDropdown);
+  elements.screenNameInput.addEventListener('focus', () => {
+    showRecentDropdown(elements.screenNameInput.value);
+  });
+
+  // Filter recent list as user types
+  elements.screenNameInput.addEventListener('input', (e) => {
+    showRecentDropdown(e.target.value);
+  });
 
   // Hide dropdown when clicking outside
   document.addEventListener('click', (e) => {
@@ -142,9 +149,16 @@ async function loadRecentUsernames() {
   }
 }
 
-function showRecentDropdown() {
+function showRecentDropdown(filterText = '') {
   if (recentUsernames.length === 0) return;
-  renderRecentList();
+
+  const filtered = filterRecentUsernames(filterText);
+  if (filtered.length === 0) {
+    hideRecentDropdown();
+    return;
+  }
+
+  renderRecentList(filtered);
   elements.recentDropdown.classList.remove('hidden');
 }
 
@@ -152,8 +166,17 @@ function hideRecentDropdown() {
   elements.recentDropdown.classList.add('hidden');
 }
 
-function renderRecentList() {
-  elements.recentList.innerHTML = recentUsernames.map(username => `
+function filterRecentUsernames(filterText) {
+  if (!filterText) return recentUsernames;
+
+  const query = filterText.toLowerCase().replace('@', '');
+  return recentUsernames.filter(username =>
+    username.toLowerCase().startsWith(query)
+  );
+}
+
+function renderRecentList(usernames) {
+  elements.recentList.innerHTML = usernames.map(username => `
     <div class="recent-item" data-username="${username}">
       <span class="recent-item-text">${username}</span>
     </div>
