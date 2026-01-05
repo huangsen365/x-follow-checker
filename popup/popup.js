@@ -45,6 +45,7 @@ const elements = {
   draftMessageBtn: null,
   draftSection: null,
   closeDraftBtn: null,
+  draftNotice: null,
   draftTextarea: null,
   copyMessageBtn: null,
   filterTabs: null,
@@ -64,6 +65,7 @@ let lastInputUsername = '';
 let popupStateSaveTimer = null;
 let isRestoringState = false;
 let lastErrorInfo = null;
+const MAX_DRAFT_MENTIONS = 10;
 
 // Initialize
 console.log('[Popup] Script loaded');
@@ -144,6 +146,7 @@ function initElements() {
   elements.draftMessageBtn = document.getElementById('draftMessageBtn');
   elements.draftSection = document.getElementById('draftSection');
   elements.closeDraftBtn = document.getElementById('closeDraftBtn');
+  elements.draftNotice = document.getElementById('draftNotice');
   elements.draftTextarea = document.getElementById('draftTextarea');
   elements.copyMessageBtn = document.getElementById('copyMessageBtn');
   elements.goPostHint = document.getElementById('goPostHint');
@@ -1319,6 +1322,7 @@ function refreshDynamicText() {
   refreshLimitWarningText();
   refreshErrorText();
   refreshGoPostHint();
+  refreshDraftNotice();
 }
 
 function refreshLimitWarningText() {
@@ -1341,12 +1345,16 @@ function refreshGoPostHint() {
   showGoPostHint(false);
 }
 
+function refreshDraftNotice() {
+  if (!elements.draftNotice) return;
+  renderDraftNotice();
+}
+
 // Draft Message Functions
 function generateDraftMessage() {
   const nonFollowers = currentResults?.notFollowingBack || [];
-  const mentions = nonFollowers
-    .map(u => `@${u.screenName}`)
-    .join(' ');
+  const sample = getRandomSample(nonFollowers, MAX_DRAFT_MENTIONS);
+  const mentions = sample.map(u => `@${u.screenName}`).join(' ');
 
   const template = t('messageTemplate');
   return template.replace('{mentions}', mentions);
@@ -1354,6 +1362,7 @@ function generateDraftMessage() {
 
 function showDraftSection(draftText = null, shouldScroll = true, shouldFocus = true) {
   elements.draftSection.classList.remove('hidden');
+  renderDraftNotice();
   elements.draftTextarea.value = draftText ?? generateDraftMessage();
   if (shouldFocus) {
     elements.draftTextarea.focus();
@@ -1366,6 +1375,24 @@ function showDraftSection(draftText = null, shouldScroll = true, shouldFocus = t
   }
 
   schedulePopupStateSave();
+}
+
+function getRandomSample(list, size) {
+  if (!Array.isArray(list) || list.length <= size) {
+    return list.slice();
+  }
+
+  const copy = list.slice();
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy.slice(0, size);
+}
+
+function renderDraftNotice() {
+  if (!elements.draftNotice) return;
+  elements.draftNotice.textContent = t('draftRandomNotice', { count: MAX_DRAFT_MENTIONS });
 }
 
 // Scroll to show Copy button

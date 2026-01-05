@@ -67,6 +67,7 @@ I used a handy tool called X Follow Checker (https://x-follow-checker.com) to ch
 Let's support each other. 🤝
 
 {mentions}`,
+    draftRandomNotice: 'Randomly selected up to {count} users for this draft.',
     newVersionAvailable: '🎉 New version {version} available! Click to update.',
     latestVersion: '(latest)',
     currentVersion: 'v{version}',
@@ -141,6 +142,7 @@ Let's support each other. 🤝
 让我们互相支持吧 🤝
 
 {mentions}`,
+    draftRandomNotice: '此草稿随机选取最多 {count} 位用户。',
     newVersionAvailable: '🎉 新版本 {version} 已发布！点击更新。',
     latestVersion: '(最新)',
     currentVersion: 'v{version}',
@@ -215,6 +217,7 @@ Let's support each other. 🤝
 讓我們互相支持吧 🤝
 
 {mentions}`,
+    draftRandomNotice: '此草稿隨機選取最多 {count} 位用戶。',
     newVersionAvailable: '🎉 新版本 {version} 已發佈！點擊更新。',
     latestVersion: '(最新)',
     currentVersion: 'v{version}',
