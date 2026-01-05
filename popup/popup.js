@@ -45,14 +45,37 @@ let currentFilter = 'all';
 let isChecking = false;
 
 // Initialize
+console.log('[Popup] Script loaded');
+
 document.addEventListener('DOMContentLoaded', async () => {
-  initElements();
-  await initLanguage();
-  await loadRecentUsernames();
-  await loadCachedResults();
-  setupEventListeners();
-  updateUI();
-  checkForUpdates();
+  console.log('[Popup] DOMContentLoaded fired');
+
+  try {
+    initElements();
+    console.log('[Popup] Elements initialized');
+    console.log('[Popup] versionInfo element:', elements.versionInfo);
+
+    await initLanguage();
+    console.log('[Popup] Language initialized');
+
+    await loadRecentUsernames();
+    console.log('[Popup] Recent usernames loaded');
+
+    await loadCachedResults();
+    console.log('[Popup] Cached results loaded');
+
+    setupEventListeners();
+    console.log('[Popup] Event listeners set up');
+
+    updateUI();
+    console.log('[Popup] UI updated');
+
+    console.log('[Popup] About to call checkForUpdates...');
+    checkForUpdates();
+    console.log('[Popup] checkForUpdates called');
+  } catch (error) {
+    console.error('[Popup] Initialization error:', error);
+  }
 });
 
 function initElements() {
