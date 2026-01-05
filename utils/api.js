@@ -292,16 +292,26 @@ export function parseFollowingResponse(response) {
   return { users, nextCursor };
 }
 
+// Maximum users to fetch (to protect API token usage)
+const MAX_USERS_LIMIT = 1000;
+
 // Fetch all following with pagination
 export async function fetchAllFollowing(userId, csrfToken, onProgress, signal) {
   const allUsers = [];
   let cursor = null;
   let page = 0;
+  let hitLimit = false;
 
   while (true) {
     // Check if cancelled
     if (signal?.aborted) {
       throw new XApiError(ErrorTypes.API_ERROR, 'Check cancelled');
+    }
+
+    // Check if we've hit the limit
+    if (allUsers.length >= MAX_USERS_LIMIT) {
+      hitLimit = true;
+      break;
     }
 
     const response = await fetchFollowingPage(userId, cursor, csrfToken);
@@ -310,14 +320,21 @@ export async function fetchAllFollowing(userId, csrfToken, onProgress, signal) {
     allUsers.push(...users);
     page++;
 
+    // Trim to max limit if exceeded
+    if (allUsers.length > MAX_USERS_LIMIT) {
+      allUsers.length = MAX_USERS_LIMIT;
+      hitLimit = true;
+    }
+
     if (onProgress) {
       onProgress({
         loaded: allUsers.length,
-        page: page
+        page: page,
+        hitLimit: hitLimit
       });
     }
 
-    if (!nextCursor || users.length === 0) {
+    if (hitLimit || !nextCursor || users.length === 0) {
       break;
     }
 
@@ -327,8 +344,12 @@ export async function fetchAllFollowing(userId, csrfToken, onProgress, signal) {
     await delay(1000);
   }
 
+  // Return with hitLimit flag
+  allUsers.hitLimit = hitLimit;
   return allUsers;
 }
+
+export { MAX_USERS_LIMIT };
 
 // Utility function for delays
 function delay(ms) {

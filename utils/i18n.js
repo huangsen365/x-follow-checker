@@ -66,7 +66,9 @@ Let's support each other. 🤝
 {mentions}`,
     newVersionAvailable: '🎉 New version {version} available! Click to update.',
     latestVersion: '(latest)',
-    currentVersion: 'v{version}'
+    currentVersion: 'v{version}',
+    limitReached: 'Results limited to 1,000 users to protect API usage.',
+    requestMoreQuota: 'Need more? Request extra quota'
   },
   zh: {
     appTitle: 'X 互关检测助手',
@@ -133,7 +135,9 @@ Let's support each other. 🤝
 {mentions}`,
     newVersionAvailable: '🎉 新版本 {version} 已发布！点击更新。',
     latestVersion: '(最新)',
-    currentVersion: 'v{version}'
+    currentVersion: 'v{version}',
+    limitReached: '为保护 API 使用量，结果限制为 1,000 位用户。',
+    requestMoreQuota: '需要更多？申请额外配额'
   },
   'zh-TW': {
     appTitle: 'X 互追檢測助手',
@@ -200,7 +204,9 @@ Let's support each other. 🤝
 {mentions}`,
     newVersionAvailable: '🎉 新版本 {version} 已發佈！點擊更新。',
     latestVersion: '(最新)',
-    currentVersion: 'v{version}'
+    currentVersion: 'v{version}',
+    limitReached: '為保護 API 使用量，結果限制為 1,000 位用戶。',
+    requestMoreQuota: '需要更多？申請額外配額'
   }
 };
 

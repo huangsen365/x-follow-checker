@@ -406,6 +406,27 @@ body {
 .results-section {
 }
 
+/* Limit Warning */
+.limit-warning {
+  padding: 10px 12px;
+  background: #fff8e6;
+  border-bottom: 1px solid #f0e0b0;
+  font-size: 12px;
+  color: #92690a;
+  text-align: center;
+}
+
+.limit-warning a {
+  color: #1d9bf0;
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 4px;
+}
+
+.limit-warning a:hover {
+  text-decoration: underline;
+}
+
 /* Stats */
 .stats {
   display: flex;

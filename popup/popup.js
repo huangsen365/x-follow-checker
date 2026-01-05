@@ -23,6 +23,9 @@ const elements = {
   errorActionBtn: null,
   reportIssueBtn: null,
   resultsSection: null,
+  limitWarning: null,
+  limitWarningText: null,
+  limitWarningLink: null,
   totalCount: null,
   mutualCount: null,
   notFollowingCount: null,
@@ -100,6 +103,9 @@ function initElements() {
   elements.errorActionBtn = document.getElementById('errorActionBtn');
   elements.reportIssueBtn = document.getElementById('reportIssueBtn');
   elements.resultsSection = document.getElementById('resultsSection');
+  elements.limitWarning = document.getElementById('limitWarning');
+  elements.limitWarningText = document.getElementById('limitWarningText');
+  elements.limitWarningLink = document.getElementById('limitWarningLink');
   elements.totalCount = document.getElementById('totalCount');
   elements.mutualCount = document.getElementById('mutualCount');
   elements.notFollowingCount = document.getElementById('notFollowingCount');
@@ -585,6 +591,31 @@ function showResults() {
   showSection(elements.resultsSection);
 
   if (!currentResults) return;
+
+  // Show/hide limit warning
+  if (currentResults.hitLimit) {
+    elements.limitWarningText.textContent = t('limitReached');
+    elements.limitWarningLink.textContent = t('requestMoreQuota');
+
+    // Create GitHub issue URL with prefilled content
+    const issueTitle = encodeURIComponent('Request: Extra Quota for More Than 1000 Users');
+    const issueBody = encodeURIComponent(`## Request for Extra Quota
+
+**Username:** @${currentResults.user?.screenName || 'unknown'}
+**Following Count:** ${currentResults.user?.followingCount || 'unknown'}
+
+### Reason
+I need to check more than 1,000 following users.
+
+### Additional Information
+(Please describe why you need extra quota)
+
+`);
+    elements.limitWarningLink.href = `https://github.com/huangsen365/x-follow-checker/issues/new?title=${issueTitle}&body=${issueBody}`;
+    elements.limitWarning.classList.remove('hidden');
+  } else {
+    elements.limitWarning.classList.add('hidden');
+  }
 
   // Update stats
   elements.totalCount.textContent = currentResults.stats.total;

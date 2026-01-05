@@ -120,7 +120,8 @@ async function startCheck(screenName) {
         total: following.length,
         mutualCount: mutual.length,
         notFollowingBackCount: notFollowingBack.length
-      }
+      },
+      hitLimit: following.hitLimit || false
     };
 
     // Cache results
