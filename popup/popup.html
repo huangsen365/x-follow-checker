@@ -21,15 +21,18 @@
     <!-- Input Section -->
     <section class="input-section">
       <div class="input-wrapper">
-        <div class="input-group">
-          <span class="input-prefix">@</span>
-          <input
-            type="text"
-            id="screenNameInput"
-            class="screen-name-input"
-            placeholder="your_username"
-            autocomplete="off"
-          >
+        <div class="input-row">
+          <div class="input-group">
+            <span class="input-prefix">@</span>
+            <input
+              type="text"
+              id="screenNameInput"
+              class="screen-name-input"
+              placeholder="your_username"
+              autocomplete="off"
+            >
+          </div>
+          <button id="detectBtn" class="btn btn-detect" data-i18n="detectUsername">Detect</button>
         </div>
         <!-- Recent Usernames Dropdown -->
         <div id="recentDropdown" class="recent-dropdown hidden">

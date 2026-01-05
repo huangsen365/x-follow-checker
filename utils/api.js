@@ -7,7 +7,8 @@ const BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puT
 const QUERY_IDS = {
   Following: 'eWTmcJY3EMh-dxIR7CYTKw',
   Followers: '1cgQROvByT7VpDSj3Ps5SQ',
-  UserByScreenName: 'BQ6xjFU6Mgm-WhEP3OiT9w'
+  UserByScreenName: 'BQ6xjFU6Mgm-WhEP3OiT9w',
+  Viewer: 'W62NnYgkgziw9bwyoVht0g'
 };
 
 // Feature flags required by X.com API
@@ -332,6 +333,45 @@ export async function fetchAllFollowing(userId, csrfToken, onProgress, signal) {
 // Utility function for delays
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Get current logged-in user
+export async function getCurrentUser(csrfToken) {
+  const variables = {
+    withCommunitiesMemberships: false,
+    withSubscribedTab: false,
+    withCommunitiesCreation: false
+  };
+
+  const features = {
+    responsive_web_graphql_exclude_directive_enabled: true,
+    verified_phone_label_enabled: false,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    responsive_web_graphql_timeline_navigation_enabled: true
+  };
+
+  const params = new URLSearchParams({
+    variables: JSON.stringify(variables),
+    features: JSON.stringify(features)
+  });
+
+  const queryId = QUERY_IDS.Viewer;
+  const url = `https://x.com/i/api/graphql/${queryId}/Viewer?${params}`;
+
+  const data = await apiRequest(url, csrfToken);
+
+  const viewer = data?.data?.viewer?.user_results?.result;
+
+  if (!viewer || !viewer.legacy) {
+    throw new XApiError(ErrorTypes.NOT_AUTHENTICATED, 'Could not detect logged-in user. Please log in to X.com first.');
+  }
+
+  return {
+    id: viewer.rest_id,
+    screenName: viewer.legacy.screen_name,
+    name: viewer.legacy.name,
+    profileImage: viewer.legacy.profile_image_url_https
+  };
 }
 
 // Export query IDs for potential updates

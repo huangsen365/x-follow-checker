@@ -3,6 +3,7 @@
 import {
   getAuthTokens,
   getUserByScreenName,
+  getCurrentUser,
   fetchAllFollowing,
   XApiError,
   ErrorTypes
@@ -43,6 +44,9 @@ async function handleMessage(request, sender) {
 
     case 'GET_CACHED_RESULTS':
       return await getCachedResults();
+
+    case 'DETECT_USERNAME':
+      return await detectUsername();
 
     default:
       throw new Error(`Unknown message type: ${request.type}`);
@@ -191,6 +195,42 @@ async function getCachedResults() {
       lastCheck: lastCheck
     }
   };
+}
+
+async function detectUsername() {
+  try {
+    // Check if we have auth tokens
+    const tokens = await getAuthTokens();
+
+    if (!tokens.csrfToken) {
+      return {
+        success: false,
+        error: {
+          type: ErrorTypes.NOT_AUTHENTICATED,
+          message: 'Please log in to X.com first'
+        }
+      };
+    }
+
+    // Get current logged-in user
+    const user = await getCurrentUser(tokens.csrfToken);
+
+    return {
+      success: true,
+      data: {
+        screenName: user.screenName,
+        name: user.name
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: {
+        type: error.type || ErrorTypes.API_ERROR,
+        message: error.message
+      }
+    };
+  }
 }
 
 // Send progress updates to popup

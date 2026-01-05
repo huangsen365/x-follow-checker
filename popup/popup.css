@@ -68,6 +68,45 @@ body {
   border-bottom: 1px solid #eff3f4;
 }
 
+.input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.input-row .input-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.btn-detect {
+  padding: 0 16px;
+  background: #eff3f4;
+  color: #0f1419;
+  border: 1px solid #cfd9de;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.btn-detect:hover:not(:disabled) {
+  background: #e7e7e8;
+  border-color: #1d9bf0;
+}
+
+.btn-detect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-detect.detecting {
+  background: #e8f5fd;
+  color: #1d9bf0;
+}
+
 .input-group {
   display: flex;
   align-items: center;

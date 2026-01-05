@@ -7,6 +7,7 @@ import * as storage from '../utils/storage.js';
 const elements = {
   langSelect: null,
   screenNameInput: null,
+  detectBtn: null,
   startBtn: null,
   recentDropdown: null,
   recentList: null,
@@ -81,6 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function initElements() {
   elements.langSelect = document.getElementById('langSelect');
   elements.screenNameInput = document.getElementById('screenNameInput');
+  elements.detectBtn = document.getElementById('detectBtn');
   elements.startBtn = document.getElementById('startBtn');
   elements.recentDropdown = document.getElementById('recentDropdown');
   elements.recentList = document.getElementById('recentList');
@@ -129,6 +131,9 @@ function setupEventListeners() {
     await storage.setLanguage(lang);
     updateTranslations();
   });
+
+  // Detect username button
+  elements.detectBtn.addEventListener('click', handleDetectUsername);
 
   // Start check button
   elements.startBtn.addEventListener('click', handleStartCheck);
@@ -296,6 +301,63 @@ async function handleClearHistory() {
     await storage.clearUsernameHistory();
     recentUsernames = [];
     hideRecentDropdown();
+  }
+}
+
+async function handleDetectUsername() {
+  console.log('[Detect] Starting username detection...');
+
+  const detectBtn = elements.detectBtn;
+  const originalText = detectBtn.textContent;
+
+  // Check if chrome.runtime is available (extension context)
+  if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+    console.log('[Detect] Not in extension context');
+    alert(t('permissionRequired'));
+    return;
+  }
+
+  // Update button state
+  detectBtn.textContent = t('detecting');
+  detectBtn.disabled = true;
+  detectBtn.classList.add('detecting');
+
+  try {
+    const response = await chrome.runtime.sendMessage({ type: 'DETECT_USERNAME' });
+    console.log('[Detect] Response:', response);
+
+    if (response.success) {
+      // Fill in the username
+      elements.screenNameInput.value = response.data.screenName;
+      console.log('[Detect] Username detected:', response.data.screenName);
+
+      // Brief success feedback
+      detectBtn.textContent = t('detectSuccess');
+      setTimeout(() => {
+        detectBtn.textContent = originalText;
+        detectBtn.disabled = false;
+        detectBtn.classList.remove('detecting');
+      }, 1500);
+    } else {
+      console.log('[Detect] Failed:', response.error);
+
+      // Show appropriate error message
+      if (response.error.type === 'NOT_AUTHENTICATED') {
+        alert(t('notLoggedInX'));
+      } else {
+        alert(t('detectFailed') + ': ' + response.error.message);
+      }
+
+      detectBtn.textContent = originalText;
+      detectBtn.disabled = false;
+      detectBtn.classList.remove('detecting');
+    }
+  } catch (error) {
+    console.error('[Detect] Error:', error);
+    alert(t('detectFailed'));
+    detectBtn.textContent = originalText;
+    detectBtn.disabled = false;
+    detectBtn.classList.remove('detecting');
   }
 }
 
