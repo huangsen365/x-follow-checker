@@ -432,7 +432,7 @@ async function handleStartCheck() {
   const screenName = elements.screenNameInput.value.trim().replace('@', '');
 
   if (!screenName) {
-    showError('error', t('notLoggedIn'), t('notLoggedInDesc'));
+    showError('NOT_AUTHENTICATED', t('notLoggedIn'), t('notLoggedInDesc'));
     return;
   }
 
