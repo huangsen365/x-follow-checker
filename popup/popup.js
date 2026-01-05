@@ -7,7 +7,11 @@ import { saveQueryIds } from '../utils/api.js';
 // DOM Elements
 const elements = {
   langSelect: null,
+  container: null,
+  content: null,
+  inputGroup: null,
   screenNameInput: null,
+  clearInputBtn: null,
   detectBtn: null,
   startBtn: null,
   recentDropdown: null,
@@ -28,6 +32,7 @@ const elements = {
   limitWarningText: null,
   limitWarningLink: null,
   continueCheckBtn: null,
+  stats: null,
   totalCount: null,
   mutualCount: null,
   notFollowingCount: null,
@@ -51,6 +56,9 @@ const elements = {
 let currentResults = null;
 let currentFilter = 'all';
 let isChecking = false;
+let lastInputUsername = '';
+let popupStateSaveTimer = null;
+let isRestoringState = false;
 
 // Initialize
 console.log('[Popup] Script loaded');
@@ -79,8 +87,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await checkRunningStatus();
     console.log('[Popup] Running status checked');
 
-    updateUI();
-    console.log('[Popup] UI updated');
+    const restored = await restorePopupState();
+    if (!restored) {
+      await updateUI();
+      console.log('[Popup] UI updated');
+    }
+
+    lastInputUsername = normalizeUsername(elements.screenNameInput.value);
 
     console.log('[Popup] About to call checkForUpdates...');
     checkForUpdates();
@@ -92,7 +105,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function initElements() {
   elements.langSelect = document.getElementById('langSelect');
+  elements.container = document.querySelector('.container');
+  elements.content = document.querySelector('.content');
+  elements.inputGroup = document.querySelector('.input-group');
   elements.screenNameInput = document.getElementById('screenNameInput');
+  elements.clearInputBtn = document.getElementById('clearInputBtn');
   elements.detectBtn = document.getElementById('detectBtn');
   elements.startBtn = document.getElementById('startBtn');
   elements.recentDropdown = document.getElementById('recentDropdown');
@@ -113,6 +130,7 @@ function initElements() {
   elements.limitWarningText = document.getElementById('limitWarningText');
   elements.limitWarningLink = document.getElementById('limitWarningLink');
   elements.continueCheckBtn = document.getElementById('continueCheckBtn');
+  elements.stats = document.querySelector('.stats');
   elements.totalCount = document.getElementById('totalCount');
   elements.mutualCount = document.getElementById('mutualCount');
   elements.notFollowingCount = document.getElementById('notFollowingCount');
@@ -153,6 +171,17 @@ function setupEventListeners() {
   // Detect username button
   elements.detectBtn.addEventListener('click', handleDetectUsername);
 
+  // Clear input button
+  elements.clearInputBtn.addEventListener('click', async () => {
+    elements.screenNameInput.value = '';
+    updateInputClearState();
+    hideRecentDropdown();
+    handleUsernameInputChange('');
+    await updateUI();
+    elements.screenNameInput.focus();
+    schedulePopupStateSave();
+  });
+
   // Start check button
   elements.startBtn.addEventListener('click', handleStartCheck);
 
@@ -192,9 +221,12 @@ function setupEventListeners() {
   });
 
   // Filter recent list as user types, and update UI when input changes
-  elements.screenNameInput.addEventListener('input', (e) => {
-    showRecentDropdown(e.target.value);
-    const inputValue = e.target.value.trim();
+  elements.screenNameInput.addEventListener('input', async (e) => {
+    const rawValue = e.target.value;
+    const inputValue = rawValue.trim();
+    handleUsernameInputChange(normalizeUsername(rawValue));
+    showRecentDropdown(rawValue);
+    updateInputClearState();
 
     if (!inputValue) {
       // Hide results if input is cleared
@@ -202,8 +234,9 @@ function setupEventListeners() {
       showSection(elements.emptyState);
     } else {
       // Check if typed username matches cached results
-      showResultsIfCached(inputValue);
+      await showResultsIfCached(inputValue);
     }
+    schedulePopupStateSave();
   });
 
   // Hide dropdown when clicking outside
@@ -224,9 +257,12 @@ function setupEventListeners() {
   elements.continueCheckBtn.addEventListener('click', handleContinueCheck);
 
   // Draft message buttons
-  elements.draftMessageBtn.addEventListener('click', showDraftSection);
+  elements.draftMessageBtn.addEventListener('click', () => showDraftSection());
   elements.closeDraftBtn.addEventListener('click', hideDraftSection);
   elements.copyMessageBtn.addEventListener('click', copyMessage);
+
+  // Draft textarea edits
+  elements.draftTextarea.addEventListener('input', schedulePopupStateSave);
 
   // Filter tabs
   elements.filterTabs.forEach(tab => {
@@ -236,12 +272,29 @@ function setupEventListeners() {
     });
   });
 
+  // Stats click -> filter + scroll to list
+  const statItems = elements.stats ? elements.stats.querySelectorAll('.stat-item') : [];
+  statItems.forEach(item => {
+    item.addEventListener('click', handleStatsClick);
+    item.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleStatsClick(e);
+      }
+    });
+  });
+
   // Listen for progress updates from background
   chrome.runtime.onMessage.addListener((message) => {
     if (message.type === 'PROGRESS_UPDATE') {
       handleProgressUpdate(message);
     }
   });
+
+  // Save scroll position
+  if (elements.content) {
+    elements.content.addEventListener('scroll', schedulePopupStateSave);
+  }
 }
 
 // Recent usernames state
@@ -265,6 +318,8 @@ async function loadRecentUsernames() {
       console.log('[RecentUsernames] Pre-filled input with most recent:', recentUsernames[0]);
     }
   }
+
+  updateInputClearState();
 }
 
 function showRecentDropdown(filterText = '') {
@@ -312,6 +367,9 @@ function selectCurrentItem() {
     elements.screenNameInput.value = username;
     hideRecentDropdown();
 
+    handleUsernameInputChange(normalizeUsername(username));
+    updateInputClearState();
+
     // Save as last selected username
     storage.setLastSelectedUsername(username);
     console.log('[Keyboard] Saved last selected username:', username);
@@ -319,6 +377,7 @@ function selectCurrentItem() {
     // Show cached results if available for this username
     console.log('[Keyboard] Calling showResultsIfCached...');
     showResultsIfCached(username);
+    schedulePopupStateSave();
   }
 }
 
@@ -350,6 +409,9 @@ function renderRecentList(usernames) {
       elements.screenNameInput.value = selectedUsername;
       hideRecentDropdown();
 
+      handleUsernameInputChange(normalizeUsername(selectedUsername));
+      updateInputClearState();
+
       // Save as last selected username
       storage.setLastSelectedUsername(selectedUsername);
       console.log('[RecentList] Saved last selected username:', selectedUsername);
@@ -357,6 +419,7 @@ function renderRecentList(usernames) {
       // Check if we have cached results for this username - show immediately if match
       console.log('[RecentList] Calling showResultsIfCached...');
       showResultsIfCached(selectedUsername);
+      schedulePopupStateSave();
     });
   });
 
@@ -415,15 +478,133 @@ async function showResultsIfCached(username) {
   } else {
     // No cache for this username - show empty state
     console.log('[Cache] ❌ No cached results for:', normalizedInput);
+    currentResults = null;
     hideAllSections();
     showSection(elements.emptyState);
+    schedulePopupStateSave();
   }
+}
+
+function normalizeUsername(value) {
+  return value.trim().replace('@', '').toLowerCase();
+}
+
+function updateInputClearState() {
+  if (!elements.inputGroup) return;
+  const hasValue = elements.screenNameInput.value.trim().length > 0;
+  elements.inputGroup.classList.toggle('has-value', hasValue);
+}
+
+function handleUsernameInputChange(normalizedUsername) {
+  if (normalizedUsername === lastInputUsername) {
+    return;
+  }
+
+  lastInputUsername = normalizedUsername;
+  resetViewForUsernameChange();
+}
+
+function resetViewForUsernameChange() {
+  if (!elements.draftSection.classList.contains('hidden')) {
+    hideDraftSection();
+  }
+  elements.goPostHint.classList.add('hidden');
+  currentResults = null;
+
+  if (currentFilter !== 'all') {
+    setFilter('all');
+  }
+
+  if (elements.content) {
+    elements.content.scrollTop = 0;
+  }
+}
+
+function schedulePopupStateSave() {
+  if (isRestoringState) return;
+  if (popupStateSaveTimer) {
+    clearTimeout(popupStateSaveTimer);
+  }
+  popupStateSaveTimer = setTimeout(() => {
+    savePopupState().catch(error => {
+      console.warn('[PopupState] Failed to save state:', error);
+    });
+  }, 200);
+}
+
+async function savePopupState() {
+  if (isRestoringState || isChecking) return;
+  const screenName = elements.screenNameInput.value.trim().replace('@', '');
+  const draftOpen = !elements.draftSection.classList.contains('hidden');
+  const goPostHintVisible = !elements.goPostHint.classList.contains('hidden');
+
+  const state = {
+    version: 1,
+    screenName,
+    filter: currentFilter,
+    draftOpen,
+    draftMessage: draftOpen ? elements.draftTextarea.value : null,
+    goPostHintVisible,
+    scrollTop: elements.content ? elements.content.scrollTop : 0,
+    timestamp: Date.now()
+  };
+
+  await storage.setPopupUiState(state);
+}
+
+async function restorePopupState() {
+  if (isChecking) return false;
+
+  const state = await storage.getPopupUiState();
+  if (!state || !state.screenName) {
+    return false;
+  }
+
+  const inputUsername = elements.screenNameInput.value.trim().replace('@', '');
+  if (inputUsername && inputUsername.toLowerCase() !== state.screenName.toLowerCase()) {
+    return false;
+  }
+
+  if (!inputUsername) {
+    elements.screenNameInput.value = state.screenName;
+  }
+  updateInputClearState();
+
+  isRestoringState = true;
+  await showResultsIfCached(state.screenName);
+
+  if (!currentResults) {
+    isRestoringState = false;
+    return false;
+  }
+
+  setFilter(state.filter || 'all');
+
+  if (state.draftOpen) {
+    showDraftSection(state.draftMessage, false, false);
+  } else {
+    hideDraftSection();
+  }
+
+  if (state.goPostHintVisible) {
+    showGoPostHint(false);
+  }
+
+  if (elements.content) {
+    requestAnimationFrame(() => {
+      elements.content.scrollTop = state.scrollTop || 0;
+    });
+  }
+
+  isRestoringState = false;
+  return true;
 }
 
 async function handleClearHistory() {
   if (confirm(t('clearHistoryConfirm'))) {
     // Clear all user data from storage for privacy
     await storage.clearAllUserData();
+    await storage.clearPopupUiState();
 
     // Clear in-memory data
     recentUsernames = [];
@@ -435,6 +616,8 @@ async function handleClearHistory() {
     showSection(elements.emptyState);
     elements.screenNameInput.value = '';
     elements.lastCheckInfo.textContent = '';
+    lastInputUsername = '';
+    updateInputClearState();
   }
 }
 
@@ -467,6 +650,11 @@ async function handleDetectUsername() {
       // Fill in the username
       elements.screenNameInput.value = response.data.screenName;
       console.log('[Detect] Username detected:', response.data.screenName);
+
+      handleUsernameInputChange(normalizeUsername(response.data.screenName));
+      updateInputClearState();
+      await showResultsIfCached(response.data.screenName);
+      schedulePopupStateSave();
 
       // Hide tip on success
       hideDetectTip();
@@ -569,7 +757,7 @@ async function handleStartCheck() {
       showError(
         response.error.type,
         getErrorTitle(response.error.type),
-        response.error.message
+        getErrorMessage(response.error)
       );
     }
   } catch (error) {
@@ -624,7 +812,7 @@ async function handleContinueCheck() {
       showError(
         response.error.type,
         getErrorTitle(response.error.type),
-        response.error.message
+        getErrorMessage(response.error)
       );
     }
   } catch (error) {
@@ -684,7 +872,7 @@ function handleProgressUpdate(message) {
       showError(
         message.error.type,
         getErrorTitle(message.error.type),
-        message.error.message
+        getErrorMessage(message.error)
       );
       setCheckingState(false);
       break;
@@ -769,6 +957,28 @@ function getErrorTitle(errorType) {
   return titles[errorType] || t('error');
 }
 
+function getErrorMessage(error) {
+  if (!error) return t('unexpectedError');
+
+  switch (error.type) {
+    case 'NOT_AUTHENTICATED':
+      return t('notLoggedInDesc');
+    case 'RATE_LIMITED':
+      return t('rateLimitedDesc');
+    case 'NETWORK_ERROR':
+      return t('networkErrorDesc');
+    default:
+      return error.message || t('unexpectedError');
+  }
+}
+
+function handleStatsClick(event) {
+  if (!currentResults) return;
+  const filter = event.currentTarget.dataset.filter || 'all';
+  setFilter(filter);
+  scrollToShowElement(elements.userList);
+}
+
 function showResults() {
   hideAllSections();
   showSection(elements.resultsSection);
@@ -808,14 +1018,18 @@ I need to check more than 1,000 following users.
 
     // Expand popup height to accommodate warning
     document.body.classList.add('limit-warning-visible');
-    document.querySelector('.container').classList.add('limit-warning-visible');
+    if (elements.container) {
+      elements.container.classList.add('limit-warning-visible');
+    }
   } else {
     elements.limitWarning.classList.add('hidden');
     elements.continueCheckBtn.classList.add('hidden');
 
     // Restore normal popup height
     document.body.classList.remove('limit-warning-visible');
-    document.querySelector('.container').classList.remove('limit-warning-visible');
+    if (elements.container) {
+      elements.container.classList.remove('limit-warning-visible');
+    }
   }
 
   // Update stats
@@ -831,6 +1045,8 @@ I need to check more than 1,000 following users.
 
   // Render user list
   renderUserList();
+
+  schedulePopupStateSave();
 }
 
 function setFilter(filter) {
@@ -841,6 +1057,7 @@ function setFilter(filter) {
   });
 
   renderUserList();
+  schedulePopupStateSave();
 }
 
 function renderUserList() {
@@ -953,6 +1170,7 @@ async function checkRunningStatus() {
         if (checkingUsername) {
           elements.screenNameInput.value = checkingUsername;
         }
+        updateInputClearState();
 
         // Show current progress if available
         const progress = response.data.progress;
@@ -986,6 +1204,7 @@ async function checkRunningStatus() {
           if (!elements.screenNameInput.value) {
             elements.screenNameInput.value = currentResults.user.screenName;
           }
+          updateInputClearState();
           // Save username to history
           await storage.addRecentUsername(currentResults.user.screenName);
           recentUsernames = await storage.getRecentUsernames();
@@ -995,7 +1214,7 @@ async function checkRunningStatus() {
         showError(
           response.data.error.type,
           getErrorTitle(response.data.error.type),
-          response.data.error.message
+          getErrorMessage(response.data.error)
         );
       }
     }
@@ -1086,6 +1305,8 @@ async function updateUI() {
     // Show cached results if available for this username
     await showResultsIfCached(screenName);
   }
+
+  schedulePopupStateSave();
 }
 
 function updateTranslations() {
@@ -1106,58 +1327,95 @@ function generateDraftMessage() {
   return template.replace('{mentions}', mentions);
 }
 
-function showDraftSection() {
+function showDraftSection(draftText = null, shouldScroll = true, shouldFocus = true) {
   elements.draftSection.classList.remove('hidden');
-  elements.draftTextarea.value = generateDraftMessage();
-  elements.draftTextarea.focus();
+  elements.draftTextarea.value = draftText ?? generateDraftMessage();
+  if (shouldFocus) {
+    elements.draftTextarea.focus();
+  }
 
   // Auto-scroll to show the Copy button above sticky footer
   // Use multiple checks to ensure scroll is complete
-  scrollToShowCopyButton();
+  if (shouldScroll) {
+    scrollToShowCopyButton();
+  }
+
+  schedulePopupStateSave();
 }
 
 // Smart scroll function - waits for layout then scrolls element into view above footer
-function scrollToShowElement(element) {
+function scrollToShowElement(element, attempts = 0) {
+  const maxAttempts = 3;
+  if (!element || !element.isConnected) return;
+
   // Wait for next frame to ensure layout is complete
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      const container = document.querySelector('.container');
-      const footer = document.querySelector('.footer');
-      const footerHeight = footer ? footer.offsetHeight : 80;
+      const container = elements.content || document.querySelector('.content');
+      if (!container) return;
+
+      const padding = 16;
       const elementRect = element.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
 
-      const visibleBottom = containerRect.bottom - footerHeight;
+      const visibleBottom = containerRect.bottom - padding;
       const elementBottom = elementRect.bottom;
 
-      if (elementBottom > visibleBottom) {
-        const scrollAmount = elementBottom - visibleBottom + 20;
-
-        // Listen for scroll end to verify element is visible
-        const onScrollEnd = () => {
-          container.removeEventListener('scrollend', onScrollEnd);
-          // Double-check after scroll completes
-          const newRect = element.getBoundingClientRect();
-          const newVisibleBottom = container.getBoundingClientRect().bottom - footerHeight;
-          if (newRect.bottom > newVisibleBottom) {
-            // Still not visible, scroll more
-            container.scrollBy({
-              top: newRect.bottom - newVisibleBottom + 20,
-              behavior: 'smooth'
-            });
-          }
-        };
-
-        container.addEventListener('scrollend', onScrollEnd, { once: true });
-        container.scrollBy({ top: scrollAmount, behavior: 'smooth' });
-
-        // Fallback if scrollend not supported or no scroll needed
-        setTimeout(() => {
-          container.removeEventListener('scrollend', onScrollEnd);
-        }, 1000);
+      if (elementBottom <= visibleBottom) {
+        return;
       }
+
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const behavior = prefersReducedMotion ? 'auto' : 'smooth';
+      const scrollAmount = elementBottom - visibleBottom;
+
+      container.scrollBy({ top: scrollAmount, behavior });
+
+      if (attempts >= maxAttempts) {
+        return;
+      }
+
+      waitForScrollEnd(container, () => {
+        scrollToShowElement(element, attempts + 1);
+      });
     });
   });
+}
+
+function waitForScrollEnd(container, callback) {
+  let idleTimeoutId = null;
+  let fallbackTimeoutId = null;
+
+  const cleanup = () => {
+    if (idleTimeoutId) {
+      clearTimeout(idleTimeoutId);
+    }
+    if (fallbackTimeoutId) {
+      clearTimeout(fallbackTimeoutId);
+    }
+    container.removeEventListener('scroll', onScroll);
+    container.removeEventListener('scrollend', onScrollEnd);
+  };
+
+  const onScrollEnd = () => {
+    cleanup();
+    callback();
+  };
+
+  const onScroll = () => {
+    if (idleTimeoutId) {
+      clearTimeout(idleTimeoutId);
+    }
+    idleTimeoutId = setTimeout(onScrollEnd, 120);
+  };
+
+  if ('onscrollend' in container) {
+    container.addEventListener('scrollend', onScrollEnd, { once: true });
+  } else {
+    container.addEventListener('scroll', onScroll);
+  }
+
+  fallbackTimeoutId = setTimeout(onScrollEnd, 240);
 }
 
 // Scroll to show Copy button
@@ -1168,6 +1426,17 @@ function scrollToShowCopyButton() {
 function hideDraftSection() {
   elements.draftSection.classList.add('hidden');
   elements.goPostHint.classList.add('hidden');
+  schedulePopupStateSave();
+}
+
+function showGoPostHint(shouldScroll = true) {
+  const goPostText = t('goPostMessage', { link: '' }).replace('{link}', '').trim();
+  elements.goPostHint.innerHTML = `${goPostText}<br><a href="https://x.com/home" target="_blank">x.com/home →</a>`;
+  elements.goPostHint.classList.remove('hidden');
+
+  if (shouldScroll) {
+    scrollToShowElement(elements.goPostHint);
+  }
 }
 
 async function copyMessage() {
@@ -1181,12 +1450,8 @@ async function copyMessage() {
     copyBtn.disabled = true;
 
     // Show "go post" hint with clickable button
-    const goPostText = t('goPostMessage', { link: '' }).replace('{link}', '').trim();
-    elements.goPostHint.innerHTML = `${goPostText}<br><a href="https://x.com/home" target="_blank">x.com/home →</a>`;
-    elements.goPostHint.classList.remove('hidden');
-
-    // Auto-scroll to make the hint fully visible above sticky footer
-    scrollToShowElement(elements.goPostHint);
+    showGoPostHint(true);
+    schedulePopupStateSave();
 
     setTimeout(() => {
       copyBtn.querySelector('.btn-copy-text').textContent = originalText;

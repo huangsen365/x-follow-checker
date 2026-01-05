@@ -493,85 +493,88 @@ const mainHtml = `<!DOCTYPE html>
           </select>
         </header>
 
-        <!-- Input Section -->
-        <section class="input-section">
-          <div class="input-wrapper">
-            <div class="input-group">
-              <span class="input-prefix">@</span>
-              <input type="text" id="screenNameInput" class="screen-name-input" placeholder="your_username" autocomplete="off">
+        <div class="content">
+          <!-- Input Section -->
+          <section class="input-section">
+            <div class="input-wrapper">
+              <div class="input-group">
+                <span class="input-prefix">@</span>
+                <input type="text" id="screenNameInput" class="screen-name-input" placeholder="your_username" autocomplete="off">
+                <button id="clearInputBtn" type="button" class="input-clear" aria-label="Clear username">×</button>
+              </div>
+              <div id="recentDropdown" class="recent-dropdown hidden">
+                <div class="recent-header" data-i18n="recentUsernames">Recent</div>
+                <div id="recentList" class="recent-list"></div>
+                <button id="clearHistoryBtn" class="btn-clear" data-i18n="clearHistory">Clear History</button>
+              </div>
             </div>
-            <div id="recentDropdown" class="recent-dropdown hidden">
-              <div class="recent-header" data-i18n="recentUsernames">Recent</div>
-              <div id="recentList" class="recent-list"></div>
-              <button id="clearHistoryBtn" class="btn-clear" data-i18n="clearHistory">Clear History</button>
+            <button id="startBtn" class="btn btn-primary">
+              <span class="btn-text" data-i18n="startCheck">Start Check</span>
+              <span class="btn-loading hidden">
+                <span class="spinner"></span>
+                <span data-i18n="checking">Checking...</span>
+              </span>
+            </button>
+          </section>
+
+          <!-- Progress Section -->
+          <section id="progressSection" class="progress-section hidden">
+            <div class="progress-bar">
+              <div id="progressFill" class="progress-fill"></div>
             </div>
-          </div>
-          <button id="startBtn" class="btn btn-primary">
-            <span class="btn-text" data-i18n="startCheck">Start Check</span>
-            <span class="btn-loading hidden">
-              <span class="spinner"></span>
-              <span data-i18n="checking">Checking...</span>
-            </span>
-          </button>
-        </section>
+            <p id="progressText" class="progress-text">Loading...</p>
+          </section>
 
-        <!-- Progress Section -->
-        <section id="progressSection" class="progress-section hidden">
-          <div class="progress-bar">
-            <div id="progressFill" class="progress-fill"></div>
-          </div>
-          <p id="progressText" class="progress-text">Loading...</p>
-        </section>
-
-        <!-- Error Section -->
-        <section id="errorSection" class="error-section hidden">
-          <div class="error-icon">⚠️</div>
-          <h3 id="errorTitle" class="error-title">Error</h3>
-          <p id="errorMessage" class="error-message"></p>
-          <div class="error-buttons">
-            <button id="errorActionBtn" class="btn btn-secondary hidden"></button>
-            <button id="reportIssueBtn" class="btn btn-link hidden" data-i18n="reportIssue">Report Issue</button>
-          </div>
-        </section>
-
-        <!-- Results Section -->
-        <section id="resultsSection" class="results-section hidden">
-          <div class="stats">
-            <div class="stat-item">
-              <span class="stat-value" id="totalCount">0</span>
-              <span class="stat-label" data-i18n="following">Following</span>
+          <!-- Error Section -->
+          <section id="errorSection" class="error-section hidden">
+            <div class="error-icon">⚠️</div>
+            <h3 id="errorTitle" class="error-title">Error</h3>
+            <p id="errorMessage" class="error-message"></p>
+            <div class="error-buttons">
+              <button id="errorActionBtn" class="btn btn-secondary hidden"></button>
+              <button id="reportIssueBtn" class="btn btn-link hidden" data-i18n="reportIssue">Report Issue</button>
             </div>
-            <div class="stat-item stat-mutual">
-              <span class="stat-value" id="mutualCount">0</span>
-              <span class="stat-label" data-i18n="mutual">Mutual</span>
+          </section>
+
+          <!-- Results Section -->
+          <section id="resultsSection" class="results-section hidden">
+            <div class="stats">
+              <div class="stat-item" data-filter="all" role="button" tabindex="0">
+                <span class="stat-value" id="totalCount">0</span>
+                <span class="stat-label" data-i18n="following">Following</span>
+              </div>
+              <div class="stat-item stat-mutual" data-filter="mutual" role="button" tabindex="0">
+                <span class="stat-value" id="mutualCount">0</span>
+                <span class="stat-label" data-i18n="mutual">Mutual</span>
+              </div>
+              <div class="stat-item stat-not-following" data-filter="notFollowing" role="button" tabindex="0">
+                <span class="stat-value" id="notFollowingCount">0</span>
+                <span class="stat-label" data-i18n="notFollowingBack">Not Following Back</span>
+              </div>
             </div>
-            <div class="stat-item stat-not-following">
-              <span class="stat-value" id="notFollowingCount">0</span>
-              <span class="stat-label" data-i18n="notFollowingBack">Not Following Back</span>
+
+            <div class="export-buttons">
+              <button id="exportCsvBtn" class="btn btn-small" data-i18n="exportCSV">Export CSV</button>
+              <button id="exportJsonBtn" class="btn btn-small" data-i18n="exportJSON">Export JSON</button>
             </div>
-          </div>
 
-          <div class="export-buttons">
-            <button id="exportCsvBtn" class="btn btn-small" data-i18n="exportCSV">Export CSV</button>
-            <button id="exportJsonBtn" class="btn btn-small" data-i18n="exportJSON">Export JSON</button>
-          </div>
+            <div class="filter-tabs">
+              <button class="filter-tab active" data-filter="all" data-i18n="all">All</button>
+              <button class="filter-tab" data-filter="mutual" data-i18n="mutual">Mutual</button>
+              <button class="filter-tab" data-filter="notFollowing" data-i18n="notFollowingBack">Not Following Back</button>
+            </div>
 
-          <div class="filter-tabs">
-            <button class="filter-tab active" data-filter="all" data-i18n="all">All</button>
-            <button class="filter-tab" data-filter="mutual" data-i18n="mutual">Mutual</button>
-            <button class="filter-tab" data-filter="notFollowing" data-i18n="notFollowingBack">Not Following Back</button>
-          </div>
+            <div id="userList" class="user-list"></div>
+            <p id="lastCheckInfo" class="last-check-info"></p>
+          </section>
 
-          <div id="userList" class="user-list"></div>
-          <p id="lastCheckInfo" class="last-check-info"></p>
-        </section>
-
-        <!-- Empty State -->
-        <section id="emptyState" class="empty-state">
-          <div class="empty-icon">🔍</div>
-          <h3 data-i18n="noResults">No results yet</h3>
-          <p data-i18n="noResultsDesc">Enter your token and username to start.</p>
-        </section>
+          <!-- Empty State -->
+          <section id="emptyState" class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h3 data-i18n="noResults">No results yet</h3>
+            <p data-i18n="noResultsDesc">Enter your token and username to start.</p>
+          </section>
+        </div>
 
         <!-- Footer -->
         <footer class="footer">
@@ -605,7 +608,9 @@ ${webApiJs}
   const elements = {
     csrfTokenInput: null,
     langSelect: null,
+    inputGroup: null,
     screenNameInput: null,
+    clearInputBtn: null,
     startBtn: null,
     recentDropdown: null,
     recentList: null,
@@ -624,6 +629,7 @@ ${webApiJs}
     notFollowingCount: null,
     exportCsvBtn: null,
     exportJsonBtn: null,
+    stats: null,
     filterTabs: null,
     userList: null,
     lastCheckInfo: null,
@@ -647,7 +653,9 @@ ${webApiJs}
   function initElements() {
     elements.csrfTokenInput = document.getElementById('csrfTokenInput');
     elements.langSelect = document.getElementById('langSelect');
+    elements.inputGroup = document.querySelector('.input-group');
     elements.screenNameInput = document.getElementById('screenNameInput');
+    elements.clearInputBtn = document.getElementById('clearInputBtn');
     elements.startBtn = document.getElementById('startBtn');
     elements.recentDropdown = document.getElementById('recentDropdown');
     elements.recentList = document.getElementById('recentList');
@@ -666,6 +674,7 @@ ${webApiJs}
     elements.notFollowingCount = document.getElementById('notFollowingCount');
     elements.exportCsvBtn = document.getElementById('exportCsvBtn');
     elements.exportJsonBtn = document.getElementById('exportJsonBtn');
+    elements.stats = document.querySelector('.stats');
     elements.filterTabs = document.querySelectorAll('.filter-tab');
     elements.userList = document.getElementById('userList');
     elements.lastCheckInfo = document.getElementById('lastCheckInfo');
@@ -684,6 +693,7 @@ ${webApiJs}
     if (recentUsernames.length > 0 && !elements.screenNameInput.value) {
       elements.screenNameInput.value = recentUsernames[0];
     }
+    updateInputClearState();
   }
 
   function setupEventListeners() {
@@ -691,6 +701,14 @@ ${webApiJs}
       setLanguage(e.target.value);
       await storage.setLanguage(e.target.value);
       updateTranslations();
+    });
+
+    elements.clearInputBtn.addEventListener('click', async () => {
+      elements.screenNameInput.value = '';
+      updateInputClearState();
+      hideRecentDropdown();
+      await updateUI();
+      elements.screenNameInput.focus();
     });
 
     elements.startBtn.addEventListener('click', handleStartCheck);
@@ -703,7 +721,10 @@ ${webApiJs}
     });
 
     elements.screenNameInput.addEventListener('focus', () => showRecentDropdown(elements.screenNameInput.value));
-    elements.screenNameInput.addEventListener('input', (e) => showRecentDropdown(e.target.value));
+    elements.screenNameInput.addEventListener('input', (e) => {
+      updateInputClearState();
+      showRecentDropdown(e.target.value);
+    });
 
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.input-wrapper')) hideRecentDropdown();
@@ -716,6 +737,17 @@ ${webApiJs}
     elements.filterTabs.forEach(tab => {
       tab.addEventListener('click', () => setFilter(tab.dataset.filter));
     });
+
+    const statItems = elements.stats ? elements.stats.querySelectorAll('.stat-item') : [];
+    statItems.forEach(item => {
+      item.addEventListener('click', handleStatsClick);
+      item.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleStatsClick(e);
+        }
+      });
+    });
   }
 
   function showRecentDropdown(filterText = '') {
@@ -725,7 +757,11 @@ ${webApiJs}
     selectedIndex = -1;
     elements.recentList.innerHTML = filtered.map(username => \`<div class="recent-item" data-username="\${username}"><span class="recent-item-text">\${username}</span></div>\`).join('');
     elements.recentList.querySelectorAll('.recent-item').forEach(item => {
-      item.addEventListener('click', () => { elements.screenNameInput.value = item.dataset.username; hideRecentDropdown(); });
+      item.addEventListener('click', () => {
+        elements.screenNameInput.value = item.dataset.username;
+        updateInputClearState();
+        hideRecentDropdown();
+      });
     });
     elements.recentDropdown.classList.remove('hidden');
   }
@@ -741,6 +777,19 @@ ${webApiJs}
       recentUsernames = [];
       hideRecentDropdown();
     }
+  }
+
+  function updateInputClearState() {
+    if (!elements.inputGroup) return;
+    const hasValue = elements.screenNameInput.value.trim().length > 0;
+    elements.inputGroup.classList.toggle('has-value', hasValue);
+  }
+
+  function handleStatsClick(event) {
+    if (!currentResults) return;
+    const filter = event.currentTarget.dataset.filter || 'all';
+    setFilter(filter);
+    elements.userList?.scrollIntoView({ block: 'start' });
   }
 
   async function handleStartCheck() {

@@ -6,8 +6,13 @@ const STORAGE_KEYS = {
   CACHED_RESULTS: 'cachedResults',
   CHECKPOINT: 'checkpoint',
   USERNAME_HISTORY: 'usernameHistory',
-  LAST_SELECTED_USERNAME: 'lastSelectedUsername'
+  LAST_SELECTED_USERNAME: 'lastSelectedUsername',
+  POPUP_UI_STATE: 'popupUiState'
 };
+
+function getPopupStorageArea() {
+  return chrome.storage.session || chrome.storage.local;
+}
 
 export async function get(key) {
   const result = await chrome.storage.local.get(key);
@@ -200,6 +205,23 @@ export async function clearAllUserData() {
   await remove(STORAGE_KEYS.LAST_CHECK);
   await remove(STORAGE_KEYS.CHECKPOINT);
   await remove(STORAGE_KEYS.LAST_SELECTED_USERNAME);
+}
+
+// Popup UI state (session storage if available)
+export async function getPopupUiState() {
+  const storageArea = getPopupStorageArea();
+  const result = await storageArea.get(STORAGE_KEYS.POPUP_UI_STATE);
+  return result[STORAGE_KEYS.POPUP_UI_STATE] || null;
+}
+
+export async function setPopupUiState(state) {
+  const storageArea = getPopupStorageArea();
+  await storageArea.set({ [STORAGE_KEYS.POPUP_UI_STATE]: state });
+}
+
+export async function clearPopupUiState() {
+  const storageArea = getPopupStorageArea();
+  await storageArea.remove(STORAGE_KEYS.POPUP_UI_STATE);
 }
 
 export { STORAGE_KEYS };

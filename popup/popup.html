@@ -18,134 +18,137 @@
       </select>
     </header>
 
-    <!-- Input Section -->
-    <section class="input-section">
-      <div class="input-wrapper">
-        <div class="input-row">
-          <div class="input-group">
-            <span class="input-prefix">@</span>
-            <input
-              type="text"
-              id="screenNameInput"
-              class="screen-name-input"
-              placeholder="your_X_username"
-              autocomplete="off"
-            >
+    <div class="content">
+      <!-- Input Section -->
+      <section class="input-section">
+        <div class="input-wrapper">
+          <div class="input-row">
+            <div class="input-group">
+              <span class="input-prefix">@</span>
+              <input
+                type="text"
+                id="screenNameInput"
+                class="screen-name-input"
+                placeholder="your_X_username"
+                autocomplete="off"
+              >
+              <button id="clearInputBtn" type="button" class="input-clear" aria-label="Clear username">×</button>
+            </div>
+            <!-- Detect button temporarily hidden due to bugs - will fix later -->
+            <button id="detectBtn" class="btn btn-detect hidden" data-i18n="detectUsername">Detect</button>
           </div>
-          <!-- Detect button temporarily hidden due to bugs - will fix later -->
-          <button id="detectBtn" class="btn btn-detect hidden" data-i18n="detectUsername">Detect</button>
-        </div>
-        <!-- Recent Usernames Dropdown -->
-        <div id="recentDropdown" class="recent-dropdown hidden">
-          <div class="recent-header" data-i18n="recentUsernames">Recent</div>
-          <div id="recentList" class="recent-list">
-            <!-- Recent usernames rendered here -->
+          <!-- Recent Usernames Dropdown -->
+          <div id="recentDropdown" class="recent-dropdown hidden">
+            <div class="recent-header" data-i18n="recentUsernames">Recent</div>
+            <div id="recentList" class="recent-list">
+              <!-- Recent usernames rendered here -->
+            </div>
+            <button id="clearHistoryBtn" class="btn-clear" data-i18n="clearHistory">Clear History</button>
           </div>
-          <button id="clearHistoryBtn" class="btn-clear" data-i18n="clearHistory">Clear History</button>
         </div>
-      </div>
-      <!-- Detect Error Tip -->
-      <div id="detectTip" class="detect-tip hidden"></div>
-      <button id="startBtn" class="btn btn-primary">
-        <span class="btn-text" data-i18n="startCheck">Start Check</span>
-        <span class="btn-loading hidden">
-          <span class="spinner"></span>
-          <span data-i18n="checking">Checking...</span>
-        </span>
-      </button>
-    </section>
+        <!-- Detect Error Tip -->
+        <div id="detectTip" class="detect-tip hidden"></div>
+        <button id="startBtn" class="btn btn-primary">
+          <span class="btn-text" data-i18n="startCheck">Start Check</span>
+          <span class="btn-loading hidden">
+            <span class="spinner"></span>
+            <span data-i18n="checking">Checking...</span>
+          </span>
+        </button>
+      </section>
 
-    <!-- Progress Section -->
-    <section id="progressSection" class="progress-section hidden">
-      <div class="progress-bar">
-        <div id="progressFill" class="progress-fill"></div>
-      </div>
-      <p id="progressText" class="progress-text">Loading...</p>
-    </section>
-
-    <!-- Error Section -->
-    <section id="errorSection" class="error-section hidden">
-      <div class="error-icon">⚠️</div>
-      <h3 id="errorTitle" class="error-title">Error</h3>
-      <p id="errorMessage" class="error-message"></p>
-      <p id="errorHint" class="error-hint hidden"></p>
-      <div class="error-buttons">
-        <button id="errorActionBtn" class="btn btn-secondary hidden"></button>
-        <button id="reportIssueBtn" class="btn btn-link hidden" data-i18n="reportIssue">Report Issue</button>
-      </div>
-    </section>
-
-    <!-- Results Section -->
-    <section id="resultsSection" class="results-section hidden">
-      <!-- Limit Warning -->
-      <div id="limitWarning" class="limit-warning hidden">
-        <span id="limitWarningText"></span>
-        <div class="limit-actions">
-          <button id="continueCheckBtn" class="btn btn-continue" data-i18n="continueCheck">Continue to Check</button>
-          <a id="limitWarningLink" href="#" target="_blank"></a>
+      <!-- Progress Section -->
+      <section id="progressSection" class="progress-section hidden">
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
         </div>
-      </div>
+        <p id="progressText" class="progress-text">Loading...</p>
+      </section>
 
-      <!-- Stats -->
-      <div class="stats">
-        <div class="stat-item">
-          <span class="stat-value" id="totalCount">0</span>
-          <span class="stat-label" data-i18n="following">Following</span>
+      <!-- Error Section -->
+      <section id="errorSection" class="error-section hidden">
+        <div class="error-icon">⚠️</div>
+        <h3 id="errorTitle" class="error-title">Error</h3>
+        <p id="errorMessage" class="error-message"></p>
+        <p id="errorHint" class="error-hint hidden"></p>
+        <div class="error-buttons">
+          <button id="errorActionBtn" class="btn btn-secondary hidden"></button>
+          <button id="reportIssueBtn" class="btn btn-link hidden" data-i18n="reportIssue">Report Issue</button>
         </div>
-        <div class="stat-item stat-mutual">
-          <span class="stat-value" id="mutualCount">0</span>
-          <span class="stat-label" data-i18n="mutual">Mutual</span>
+      </section>
+
+      <!-- Results Section -->
+      <section id="resultsSection" class="results-section hidden">
+        <!-- Limit Warning -->
+        <div id="limitWarning" class="limit-warning hidden">
+          <span id="limitWarningText"></span>
+          <div class="limit-actions">
+            <button id="continueCheckBtn" class="btn btn-continue" data-i18n="continueCheck">Continue to Check</button>
+            <a id="limitWarningLink" href="#" target="_blank"></a>
+          </div>
         </div>
-        <div class="stat-item stat-not-following">
-          <span class="stat-value" id="notFollowingCount">0</span>
-          <span class="stat-label" data-i18n="notFollowingBack">Not Following Back</span>
+
+        <!-- Stats -->
+        <div class="stats">
+          <div class="stat-item" data-filter="all" role="button" tabindex="0">
+            <span class="stat-value" id="totalCount">0</span>
+            <span class="stat-label" data-i18n="following">Following</span>
+          </div>
+          <div class="stat-item stat-mutual" data-filter="mutual" role="button" tabindex="0">
+            <span class="stat-value" id="mutualCount">0</span>
+            <span class="stat-label" data-i18n="mutual">Mutual</span>
+          </div>
+          <div class="stat-item stat-not-following" data-filter="notFollowing" role="button" tabindex="0">
+            <span class="stat-value" id="notFollowingCount">0</span>
+            <span class="stat-label" data-i18n="notFollowingBack">Not Following Back</span>
+          </div>
         </div>
-      </div>
 
-      <!-- Export Buttons -->
-      <div class="export-buttons">
-        <button id="exportCsvBtn" class="btn btn-small" data-i18n="exportCSV">Export CSV</button>
-        <button id="exportJsonBtn" class="btn btn-small" data-i18n="exportJSON">Export JSON</button>
-        <button id="draftMessageBtn" class="btn btn-small btn-accent" data-i18n="draftMessage">Draft Message</button>
-      </div>
-
-      <!-- Draft Message Section -->
-      <div id="draftSection" class="draft-section hidden">
-        <div class="draft-header">
-          <span data-i18n="draftMessage">Draft Message</span>
-          <button id="closeDraftBtn" class="btn-close">×</button>
+        <!-- Export Buttons -->
+        <div class="export-buttons">
+          <button id="exportCsvBtn" class="btn btn-small" data-i18n="exportCSV">Export CSV</button>
+          <button id="exportJsonBtn" class="btn btn-small" data-i18n="exportJSON">Export JSON</button>
+          <button id="draftMessageBtn" class="btn btn-small btn-accent" data-i18n="draftMessage">Draft Message</button>
         </div>
-        <textarea id="draftTextarea" class="draft-textarea" rows="6"></textarea>
-        <div class="draft-actions">
-          <button id="copyMessageBtn" class="btn btn-primary">
-            <span class="btn-copy-text" data-i18n="copyMessage">Copy Message</span>
-          </button>
+
+        <!-- Draft Message Section -->
+        <div id="draftSection" class="draft-section hidden">
+          <div class="draft-header">
+            <span data-i18n="draftMessage">Draft Message</span>
+            <button id="closeDraftBtn" class="btn-close">×</button>
+          </div>
+          <textarea id="draftTextarea" class="draft-textarea" rows="6"></textarea>
+          <div class="draft-actions">
+            <button id="copyMessageBtn" class="btn btn-primary">
+              <span class="btn-copy-text" data-i18n="copyMessage">Copy Message</span>
+            </button>
+          </div>
+          <div id="goPostHint" class="go-post-hint hidden"></div>
         </div>
-        <div id="goPostHint" class="go-post-hint hidden"></div>
-      </div>
 
-      <!-- Filter Tabs -->
-      <div class="filter-tabs">
-        <button class="filter-tab active" data-filter="all" data-i18n="all">All</button>
-        <button class="filter-tab" data-filter="mutual" data-i18n="mutual">Mutual</button>
-        <button class="filter-tab" data-filter="notFollowing" data-i18n="notFollowingBack">Not Following Back</button>
-      </div>
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all" data-i18n="all">All</button>
+          <button class="filter-tab" data-filter="mutual" data-i18n="mutual">Mutual</button>
+          <button class="filter-tab" data-filter="notFollowing" data-i18n="notFollowingBack">Not Following Back</button>
+        </div>
 
-      <!-- User List -->
-      <div id="userList" class="user-list">
-        <!-- Users will be rendered here -->
-      </div>
+        <!-- User List -->
+        <div id="userList" class="user-list">
+          <!-- Users will be rendered here -->
+        </div>
 
-      <!-- Last Check Info -->
-      <p id="lastCheckInfo" class="last-check-info"></p>
-    </section>
+        <!-- Last Check Info -->
+        <p id="lastCheckInfo" class="last-check-info"></p>
+      </section>
 
-    <!-- Empty State -->
-    <section id="emptyState" class="empty-state">
-      <div class="empty-icon">🔍</div>
-      <h3 data-i18n="noResults">No results yet</h3>
-      <p data-i18n="noResultsDesc">Click "Start Check" to scan your following list.</p>
-    </section>
+      <!-- Empty State -->
+      <section id="emptyState" class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3 data-i18n="noResults">No results yet</h3>
+        <p data-i18n="noResultsDesc">Click "Start Check" to scan your following list.</p>
+      </section>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
