@@ -658,6 +658,26 @@ body {
   gap: 8px;
 }
 
+.go-post-hint {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #e8f5e9;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #2e7d32;
+  text-align: center;
+}
+
+.go-post-hint a {
+  color: #1d9bf0;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.go-post-hint a:hover {
+  text-decoration: underline;
+}
+
 .btn-accent {
   background: #1d9bf0;
   color: #fff;

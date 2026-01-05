@@ -81,6 +81,7 @@ function initElements() {
   elements.closeDraftBtn = document.getElementById('closeDraftBtn');
   elements.draftTextarea = document.getElementById('draftTextarea');
   elements.copyMessageBtn = document.getElementById('copyMessageBtn');
+  elements.goPostHint = document.getElementById('goPostHint');
   elements.filterTabs = document.querySelectorAll('.filter-tab');
   elements.userList = document.getElementById('userList');
   elements.lastCheckInfo = document.getElementById('lastCheckInfo');
@@ -618,6 +619,7 @@ function showDraftSection() {
 
 function hideDraftSection() {
   elements.draftSection.classList.add('hidden');
+  elements.goPostHint.classList.add('hidden');
 }
 
 async function copyMessage() {
@@ -629,6 +631,11 @@ async function copyMessage() {
     const originalText = copyBtn.querySelector('.btn-copy-text').textContent;
     copyBtn.querySelector('.btn-copy-text').textContent = t('messageCopied');
     copyBtn.disabled = true;
+
+    // Show "go post" hint with clickable link
+    const xHomeLink = '<a href="https://x.com/home" target="_blank">x.com/home</a>';
+    elements.goPostHint.innerHTML = t('goPostMessage', { link: xHomeLink });
+    elements.goPostHint.classList.remove('hidden');
 
     setTimeout(() => {
       copyBtn.querySelector('.btn-copy-text').textContent = originalText;
