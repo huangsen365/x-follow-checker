@@ -19,6 +19,7 @@ const elements = {
   errorSection: null,
   errorTitle: null,
   errorMessage: null,
+  errorHint: null,
   errorActionBtn: null,
   reportIssueBtn: null,
   resultsSection: null,
@@ -95,6 +96,7 @@ function initElements() {
   elements.errorSection = document.getElementById('errorSection');
   elements.errorTitle = document.getElementById('errorTitle');
   elements.errorMessage = document.getElementById('errorMessage');
+  elements.errorHint = document.getElementById('errorHint');
   elements.errorActionBtn = document.getElementById('errorActionBtn');
   elements.reportIssueBtn = document.getElementById('reportIssueBtn');
   elements.resultsSection = document.getElementById('resultsSection');
@@ -532,9 +534,10 @@ function showError(type, title, message) {
   elements.errorTitle.textContent = title;
   elements.errorMessage.textContent = message;
 
-  // Reset buttons
+  // Reset buttons and hint
   elements.errorActionBtn.classList.add('hidden');
   elements.reportIssueBtn.classList.add('hidden');
+  elements.errorHint.classList.add('hidden');
 
   // Show action button for specific errors
   if (type === 'NOT_AUTHENTICATED') {
@@ -543,6 +546,9 @@ function showError(type, title, message) {
     elements.errorActionBtn.onclick = () => {
       chrome.tabs.create({ url: 'https://x.com/login' });
     };
+    // Show username input reminder
+    elements.errorHint.textContent = t('alsoInputUsername');
+    elements.errorHint.classList.remove('hidden');
   } else if (type === 'RATE_LIMITED') {
     elements.errorActionBtn.textContent = t('retry');
     elements.errorActionBtn.classList.remove('hidden');

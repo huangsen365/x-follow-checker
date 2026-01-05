@@ -369,6 +369,16 @@ body {
 .error-message {
   font-size: 13px;
   color: #536471;
+  margin-bottom: 12px;
+}
+
+.error-hint {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f4212e;
+  background: #fef2f2;
+  padding: 10px 12px;
+  border-radius: 8px;
   margin-bottom: 16px;
 }
 
