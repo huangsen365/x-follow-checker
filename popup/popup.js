@@ -650,39 +650,60 @@ async function copyMessage() {
 const APP_VERSION = '1.0.0'; // Fallback version for web
 
 async function checkForUpdates() {
+  console.log('[VersionCheck] Starting version check...');
+
   try {
     // Get current version from manifest (Chrome extension) or fallback
     let currentVersion = APP_VERSION;
+    console.log('[VersionCheck] Default version:', APP_VERSION);
+
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest) {
       const manifest = chrome.runtime.getManifest();
       currentVersion = manifest.version;
+      console.log('[VersionCheck] Got version from manifest:', currentVersion);
+    } else {
+      console.log('[VersionCheck] No manifest available, using fallback version');
     }
 
     // Show current version immediately
+    console.log('[VersionCheck] Setting version info text:', `v${currentVersion}`);
     elements.versionInfo.textContent = `v${currentVersion}`;
 
-    const response = await fetch(
-      `https://version-check.x-follow-checker.com/is-latest-version?v=${currentVersion}`
-    );
+    const apiUrl = `https://version-check.x-follow-checker.com/is-latest-version?v=${currentVersion}`;
+    console.log('[VersionCheck] Fetching:', apiUrl);
 
-    if (!response.ok) return;
+    const response = await fetch(apiUrl);
+    console.log('[VersionCheck] Response status:', response.status, response.statusText);
+
+    if (!response.ok) {
+      console.log('[VersionCheck] Response not OK, aborting');
+      return;
+    }
 
     const data = await response.json();
+    console.log('[VersionCheck] API response data:', JSON.stringify(data, null, 2));
 
     if (data.isLatest) {
       // Already on latest version
+      console.log('[VersionCheck] Already on latest version');
       elements.versionInfo.textContent = `v${currentVersion} ${t('latestVersion')}`;
       elements.versionInfo.classList.add('version-latest');
     } else if (data.downloadUrl) {
       // New version available - show update link
+      console.log('[VersionCheck] New version available:', data.latestVersion);
       elements.updateMessage.textContent = t('newVersionAvailable', {
         version: data.latestVersion
       });
       elements.updateLink.href = data.downloadUrl;
       elements.updateLink.classList.remove('hidden');
+    } else {
+      console.log('[VersionCheck] Unexpected response - no isLatest or downloadUrl');
     }
+
+    console.log('[VersionCheck] Completed successfully');
   } catch (error) {
-    // Silently fail - version check is non-critical
-    console.log('Version check failed:', error.message);
+    console.error('[VersionCheck] Error:', error);
+    console.error('[VersionCheck] Error message:', error.message);
+    console.error('[VersionCheck] Error stack:', error.stack);
   }
 }
