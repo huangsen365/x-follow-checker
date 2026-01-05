@@ -173,9 +173,14 @@ function setupEventListeners() {
     showRecentDropdown(elements.screenNameInput.value);
   });
 
-  // Filter recent list as user types
+  // Filter recent list as user types, and update UI when input changes
   elements.screenNameInput.addEventListener('input', (e) => {
     showRecentDropdown(e.target.value);
+    // Hide results if input is cleared
+    if (!e.target.value.trim()) {
+      hideAllSections();
+      showSection(elements.emptyState);
+    }
   });
 
   // Hide dropdown when clicking outside
@@ -671,7 +676,10 @@ function showSection(section) {
 function updateUI() {
   hideAllSections();
 
-  if (currentResults) {
+  const screenName = elements.screenNameInput.value.trim().replace('@', '');
+
+  // Only show results if there's a username in the input
+  if (currentResults && screenName) {
     showResults();
   } else {
     showSection(elements.emptyState);
