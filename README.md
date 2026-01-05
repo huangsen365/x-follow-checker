@@ -15,13 +15,29 @@ English | [简体中文](./README.zh-CN.md) | [繁體中文](./README.zh-TW.md)
 - **Export data** — Download results as CSV or JSON
 - **Privacy-focused** — All data processed locally, no external servers
 
+## Download
+
+### For Developers
+
+```bash
+# HTTPS
+git clone https://github.com/huangsen365/x-follow-checker.git
+
+# SSH
+git clone git@github.com:huangsen365/x-follow-checker.git
+```
+
+### For Regular Users
+
+**[⬇️ Download ZIP](https://github.com/huangsen365/x-follow-checker/archive/refs/heads/main.zip)** — Click to download, then unzip the file.
+
 ## Installation
 
-1. Download or clone this repository
+1. Unzip the downloaded file (if you downloaded ZIP)
 2. Open Chrome and go to `chrome://extensions/`
 3. Enable **Developer mode** (toggle in top right)
 4. Click **Load unpacked**
-5. Select the `x-follow-checker` folder
+5. Select the `x-follow-checker-main` folder (or `x-follow-checker` if cloned)
 
 ## Usage
 

@@ -15,13 +15,29 @@
 - **数据导出** — 支持导出 CSV 或 JSON 格式
 - **隐私保护** — 所有数据本地处理，不上传服务器
 
+## 下载
+
+### 开发者
+
+```bash
+# HTTPS
+git clone https://github.com/huangsen365/x-follow-checker.git
+
+# SSH
+git clone git@github.com:huangsen365/x-follow-checker.git
+```
+
+### 普通用户
+
+**[⬇️ 下载 ZIP 压缩包](https://github.com/huangsen365/x-follow-checker/archive/refs/heads/main.zip)** — 点击下载，然后解压文件。
+
 ## 安装方法
 
-1. 下载或克隆此仓库
+1. 解压下载的文件（如果是 ZIP 下载）
 2. 打开 Chrome 浏览器，访问 `chrome://extensions/`
 3. 开启右上角的**开发者模式**
 4. 点击**加载已解压的扩展程序**
-5. 选择 `x-follow-checker` 文件夹
+5. 选择 `x-follow-checker-main` 文件夹（如果是 git clone 则选择 `x-follow-checker`）
 
 ## 使用说明
 
