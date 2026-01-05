@@ -61,6 +61,10 @@ git clone git@github.com:huangsen365/x-follow-checker.git
 - 发现问题或有新功能建议？欢迎[创建 Issue](../../issues)
 - 欢迎提交 Pull Request 贡献代码！
 
+## 作者
+
+**Yunbiyun** — [@yunbiyun](https://x.com/yunbiyun)
+
 ## 开源协议
 
 MIT

@@ -61,6 +61,10 @@ If you find this project helpful, please consider:
 - [Report bugs or request features](../../issues) by creating an issue
 - Contributions via pull requests are welcome!
 
+## Author
+
+**Yunbiyun** — [@yunbiyun](https://x.com/yunbiyun)
+
 ## License
 
 MIT
