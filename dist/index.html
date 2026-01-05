@@ -214,6 +214,28 @@ body {
   color: #1d9bf0;
 }
 
+/* Detect Error Tip */
+.detect-tip {
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #dc2626;
+  line-height: 1.4;
+}
+
+.detect-tip a {
+  color: #1d9bf0;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.detect-tip a:hover {
+  text-decoration: underline;
+}
+
 .input-group {
   display: flex;
   align-items: center;
@@ -1062,6 +1084,9 @@ const translations = {
     detectFailed: 'Could not detect username',
     permissionRequired: 'Permission required. Please allow access to X.com when prompted.',
     notLoggedInX: 'Please log in to X.com first, then try again.',
+    detectTipNotLoggedIn: 'Could not detect username. Please {loginLink} first, then try again. Or manually enter your username above.',
+    detectTipError: 'Could not detect username automatically. Please manually enter your username above.',
+    loginToX: 'log in to X.com',
     viewOnGitHub: 'Star on GitHub',
     reportIssue: 'Report Issue',
     unexpectedError: 'Something went wrong. Please report this issue so we can fix it.',
@@ -1125,6 +1150,9 @@ Let's support each other. 🤝
     detectFailed: '无法检测用户名',
     permissionRequired: '需要权限。请在提示时允许访问 X.com。',
     notLoggedInX: '请先登录 X.com，然后重试。',
+    detectTipNotLoggedIn: '无法检测用户名。请先{loginLink}，然后重试。或者在上方手动输入您的用户名。',
+    detectTipError: '无法自动检测用户名。请在上方手动输入您的用户名。',
+    loginToX: '登录 X.com',
     viewOnGitHub: '在 GitHub 上加星',
     reportIssue: '反馈问题',
     unexpectedError: '出现了意外错误，请反馈此问题以便我们修复。',
@@ -1188,6 +1216,9 @@ Let's support each other. 🤝
     detectFailed: '無法偵測用戶名',
     permissionRequired: '需要權限。請在提示時允許存取 X.com。',
     notLoggedInX: '請先登入 X.com，然後重試。',
+    detectTipNotLoggedIn: '無法偵測用戶名。請先{loginLink}，然後重試。或者在上方手動輸入您的用戶名。',
+    detectTipError: '無法自動偵測用戶名。請在上方手動輸入您的用戶名。',
+    loginToX: '登入 X.com',
     viewOnGitHub: '在 GitHub 上加星',
     reportIssue: '回報問題',
     unexpectedError: '發生了意外錯誤，請回報此問題以便我們修復。',

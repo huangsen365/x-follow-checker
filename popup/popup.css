@@ -107,6 +107,28 @@ body {
   color: #1d9bf0;
 }
 
+/* Detect Error Tip */
+.detect-tip {
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #dc2626;
+  line-height: 1.4;
+}
+
+.detect-tip a {
+  color: #1d9bf0;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.detect-tip a:hover {
+  text-decoration: underline;
+}
+
 .input-group {
   display: flex;
   align-items: center;

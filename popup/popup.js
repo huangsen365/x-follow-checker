@@ -12,6 +12,7 @@ const elements = {
   recentDropdown: null,
   recentList: null,
   clearHistoryBtn: null,
+  detectTip: null,
   progressSection: null,
   progressFill: null,
   progressText: null,
@@ -87,6 +88,7 @@ function initElements() {
   elements.recentDropdown = document.getElementById('recentDropdown');
   elements.recentList = document.getElementById('recentList');
   elements.clearHistoryBtn = document.getElementById('clearHistoryBtn');
+  elements.detectTip = document.getElementById('detectTip');
   elements.progressSection = document.getElementById('progressSection');
   elements.progressFill = document.getElementById('progressFill');
   elements.progressText = document.getElementById('progressText');
@@ -315,10 +317,13 @@ async function handleDetectUsername() {
   const detectBtn = elements.detectBtn;
   const originalText = detectBtn.textContent;
 
+  // Hide any previous tip
+  hideDetectTip();
+
   // Check if chrome.runtime is available (extension context)
   if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
     console.log('[Detect] Not in extension context');
-    alert(t('permissionRequired'));
+    showDetectTip('error');
     return;
   }
 
@@ -336,6 +341,9 @@ async function handleDetectUsername() {
       elements.screenNameInput.value = response.data.screenName;
       console.log('[Detect] Username detected:', response.data.screenName);
 
+      // Hide tip on success
+      hideDetectTip();
+
       // Brief success feedback
       detectBtn.textContent = t('detectSuccess');
       setTimeout(() => {
@@ -346,11 +354,11 @@ async function handleDetectUsername() {
     } else {
       console.log('[Detect] Failed:', response.error);
 
-      // Show appropriate error message
+      // Show appropriate error tip
       if (response.error.type === 'NOT_AUTHENTICATED') {
-        alert(t('notLoggedInX'));
+        showDetectTip('notLoggedIn');
       } else {
-        alert(t('detectFailed') + ': ' + response.error.message);
+        showDetectTip('error');
       }
 
       detectBtn.textContent = originalText;
@@ -359,11 +367,29 @@ async function handleDetectUsername() {
     }
   } catch (error) {
     console.error('[Detect] Error:', error);
-    alert(t('detectFailed'));
+    showDetectTip('error');
     detectBtn.textContent = originalText;
     detectBtn.disabled = false;
     detectBtn.classList.remove('detecting');
   }
+}
+
+function showDetectTip(type) {
+  const tip = elements.detectTip;
+
+  if (type === 'notLoggedIn') {
+    // Create clickable login link
+    const loginLink = `<a href="https://x.com/login" target="_blank">${t('loginToX')}</a>`;
+    tip.innerHTML = t('detectTipNotLoggedIn', { loginLink: loginLink });
+  } else {
+    tip.textContent = t('detectTipError');
+  }
+
+  tip.classList.remove('hidden');
+}
+
+function hideDetectTip() {
+  elements.detectTip.classList.add('hidden');
 }
 
 async function handleStartCheck() {
