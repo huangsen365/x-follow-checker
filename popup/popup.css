@@ -838,6 +838,28 @@ body.limit-warning-visible,
   opacity: 0.8;
 }
 
+.side-panel-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #1d9bf0;
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.side-panel-link:hover {
+  background: rgba(29, 155, 240, 0.1);
+}
+
+.verified-icon {
+  opacity: 0.9;
+}
+
 .version-info {
   font-size: 11px;
   color: #8899a6;

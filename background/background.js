@@ -5,6 +5,7 @@ import {
   getUserByScreenName,
   getCurrentUser,
   fetchAllFollowing,
+  fetchVerifiedFollowers,
   XApiError,
   ErrorTypes
 } from '../utils/api.js';
@@ -50,6 +51,12 @@ async function handleMessage(request, sender) {
 
     case 'DETECT_USERNAME':
       return await detectUsername();
+
+    case 'LOAD_VERIFIED_FOLLOWERS':
+      return await loadVerifiedFollowers(request.username, request.cursor);
+
+    case 'GET_VERIFIED_FOLLOWERS_CACHE':
+      return await getVerifiedFollowersCache(request.username);
 
     case 'USER_LOGGED_IN':
       // Content script notifies when user is logged in - acknowledge silently
@@ -395,6 +402,98 @@ async function detectUsername() {
       success: false,
       error: {
         type: error.type || ErrorTypes.API_ERROR,
+        message: error.message
+      }
+    };
+  }
+}
+
+async function loadVerifiedFollowers(username, cursor = null) {
+  console.log('[Background] loadVerifiedFollowers called for:', username, 'cursor:', cursor);
+  try {
+    // Get auth tokens
+    console.log('[Background] Getting auth tokens...');
+    const tokens = await getAuthTokens();
+    console.log('[Background] CSRF token available:', !!tokens.csrfToken);
+
+    if (!tokens.csrfToken) {
+      throw new XApiError(
+        ErrorTypes.NOT_AUTHENTICATED,
+        'Please log in to X.com first'
+      );
+    }
+
+    // Get user info first
+    console.log('[Background] Fetching user info for:', username);
+    const user = await getUserByScreenName(username, tokens.csrfToken);
+    console.log('[Background] User found:', user.id, user.name);
+
+    // Fetch verified followers
+    console.log('[Background] Fetching verified followers for user ID:', user.id);
+    const result = await fetchVerifiedFollowers(
+      user.id,
+      tokens.csrfToken,
+      (progress) => {
+        console.log('[Background] Progress:', progress);
+        // Send progress updates to side panel
+        chrome.runtime.sendMessage({
+          type: 'VERIFIED_FOLLOWERS_PROGRESS',
+          loaded: progress.loaded,
+          page: progress.page
+        }).catch(() => {
+          // Side panel might be closed, ignore error
+        });
+      },
+      null, // signal
+      cursor,
+      50 // max results per page
+    );
+
+    console.log('[Background] Verified followers fetched:', result.users.length, 'hasMore:', result.hasMore);
+
+    // Cache only first page for fast reopen/load from cache.
+    if (!cursor) {
+      await storage.setVerifiedFollowersCache(username, {
+        user: user,
+        followers: result.users,
+        hasMore: result.hasMore,
+        nextCursor: result.nextCursor
+      });
+    }
+
+    return {
+      success: true,
+      data: {
+        user: user,
+        followers: result.users,
+        hasMore: result.hasMore,
+        nextCursor: result.nextCursor
+      }
+    };
+  } catch (error) {
+    console.error('[Background] Error loading verified followers:', error);
+    return {
+      success: false,
+      error: {
+        type: error.type || ErrorTypes.API_ERROR,
+        message: error.message
+      }
+    };
+  }
+}
+
+async function getVerifiedFollowersCache(username) {
+  try {
+    const cached = await storage.getVerifiedFollowersCache(username);
+    return {
+      success: true,
+      data: cached
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: {
+        type: ErrorTypes.API_ERROR,
         message: error.message
       }
     };

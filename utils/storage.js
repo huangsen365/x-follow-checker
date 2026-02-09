@@ -110,6 +110,31 @@ export async function cleanupCachedResults() {
   await set(STORAGE_KEYS.CACHED_RESULTS, cleaned);
 }
 
+// Verified followers cache functions
+export async function setVerifiedFollowersCache(username, data) {
+  if (!username) return;
+
+  const key = `verifiedFollowers_${username.toLowerCase()}`;
+  await set(key, {
+    ...data,
+    timestamp: Date.now()
+  });
+}
+
+export async function getVerifiedFollowersCache(username) {
+  if (!username) return null;
+
+  const key = `verifiedFollowers_${username.toLowerCase()}`;
+  const cached = await get(key);
+
+  // Cache expires after 1 hour
+  if (cached && (Date.now() - cached.timestamp) < 3600000) {
+    return cached;
+  }
+
+  return null;
+}
+
 // Checkpoint for resuming interrupted checks
 export async function saveCheckpoint(checkpoint) {
   await set(STORAGE_KEYS.CHECKPOINT, {

@@ -410,6 +410,243 @@ function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Fetch verified followers page (uses Followers endpoint)
+export async function fetchVerifiedFollowersPage(userId, cursor, csrfToken, signal) {
+  const variables = {
+    userId: userId,
+    count: 100, // Higher count to maximize efficiency since we'll filter
+    includePromotedContent: false
+  };
+
+  if (cursor) {
+    variables.cursor = cursor;
+  }
+
+  const params = new URLSearchParams({
+    variables: JSON.stringify(variables),
+    features: JSON.stringify(DEFAULT_FEATURES),
+    fieldToggles: JSON.stringify(FIELD_TOGGLES)
+  });
+
+  // Get dynamic query ID from storage
+  const queryIds = await getQueryIds();
+  const queryId = queryIds.Followers;
+  const url = `https://x.com/i/api/graphql/${queryId}/Followers?${params}`;
+
+  return await apiRequest(url, csrfToken, signal);
+}
+
+// Parse verified followers response (filters for verified users only)
+export function parseVerifiedFollowersResponse(response) {
+  const instructions = response?.data?.user?.result?.timeline?.timeline?.instructions || [];
+  const addEntriesInstruction = instructions.find(i =>
+    i.type === 'TimelineAddEntries' || i.entries
+  );
+
+  if (!addEntriesInstruction) {
+    return { users: [], nextCursor: null };
+  }
+
+  const entries = addEntriesInstruction.entries || [];
+  const users = [];
+  let nextCursor = null;
+
+  for (const entry of entries) {
+    // Handle user entries
+    const itemContent = entry.content?.itemContent;
+    if (itemContent?.itemType === 'TimelineUser' || itemContent?.user_results) {
+      const userResult = itemContent.user_results?.result;
+      if (userResult && userResult.legacy) {
+        // Only include verified users
+        const isVerified = userResult.is_blue_verified || userResult.legacy.verified || false;
+        if (isVerified) {
+          users.push({
+            id: userResult.rest_id,
+            screenName: userResult.legacy.screen_name,
+            name: userResult.legacy.name,
+            profileImage: userResult.legacy.profile_image_url_https?.replace('_normal', '_bigger'),
+            description: userResult.legacy.description || '',
+            followedBy: userResult.legacy.followed_by || false,
+            verified: true
+          });
+        }
+      }
+    }
+
+    // Handle cursor entries
+    if (entry.content?.entryType === 'TimelineTimelineCursor' ||
+        entry.content?.cursorType) {
+      if (entry.content.cursorType === 'Bottom' ||
+          entry.entryId?.includes('cursor-bottom')) {
+        nextCursor = entry.content.value;
+      }
+    }
+  }
+
+  return { users, nextCursor };
+}
+
+// Fetch verified followers with pagination
+export async function fetchVerifiedFollowers(userId, csrfToken, onProgress, signal, startCursor = null, maxResults = 50) {
+  const allUsers = [];
+  let cursor = startCursor;
+  let page = 0;
+  const seenCursors = new Set();
+  const MAX_PAGES_PER_BATCH = 20;
+  let hasMore = false;
+  let nextCursorForContinue = null;
+
+  while (allUsers.length < maxResults && page < MAX_PAGES_PER_BATCH) {
+    // Check if cancelled
+    if (signal?.aborted) {
+      throw new XApiError(ErrorTypes.API_ERROR, 'Check cancelled');
+    }
+
+    // Prevent infinite loops if API returns a repeated cursor.
+    if (cursor && seenCursors.has(cursor)) {
+      hasMore = false;
+      nextCursorForContinue = null;
+      break;
+    }
+    if (cursor) {
+      seenCursors.add(cursor);
+    }
+
+    let response;
+    try {
+      response = await fetchVerifiedFollowersPage(userId, cursor, csrfToken, signal);
+    } catch (error) {
+      // Followers endpoint/query ID can be stale. Fall back to the known-good
+      // Following pipeline used by the main checker so side panel still works.
+      if (isHttp404Error(error)) {
+        console.warn('[API] Followers endpoint returned 404, falling back to Following endpoint');
+        return await fetchVerifiedFollowersFromFollowing(
+          userId,
+          csrfToken,
+          onProgress,
+          signal,
+          cursor,
+          maxResults
+        );
+      }
+      throw error;
+    }
+
+    const { users, nextCursor } = parseVerifiedFollowersResponse(response);
+
+    allUsers.push(...users);
+    page++;
+
+    if (onProgress) {
+      onProgress({
+        loaded: allUsers.length,
+        page: page
+      });
+    }
+
+    // Stop if we have enough results.
+    if (allUsers.length >= maxResults) {
+      return {
+        users: allUsers.slice(0, maxResults),
+        hasMore: Boolean(nextCursor),
+        nextCursor: nextCursor || null
+      };
+    }
+
+    // Continue scanning follower timeline even when a page has zero verified users.
+    if (!nextCursor) {
+      hasMore = false;
+      nextCursorForContinue = null;
+      break;
+    }
+
+    hasMore = true;
+    nextCursorForContinue = nextCursor;
+    cursor = nextCursor;
+
+    // Rate limit protection - wait between requests
+    await delay(1000);
+  }
+
+  return {
+    users: allUsers,
+    hasMore: hasMore,
+    nextCursor: nextCursorForContinue
+  };
+}
+
+function isHttp404Error(error) {
+  return (
+    error?.type === ErrorTypes.API_ERROR &&
+    typeof error?.message === 'string' &&
+    error.message.includes('HTTP 404')
+  );
+}
+
+// Fallback path that reuses the same request/parser flow as the main checker.
+async function fetchVerifiedFollowersFromFollowing(
+  userId,
+  csrfToken,
+  onProgress,
+  signal,
+  startCursor = null,
+  maxResults = 50
+) {
+  const allUsers = [];
+  let cursor = startCursor;
+  let page = 0;
+  const seenCursors = new Set();
+  const MAX_PAGES_PER_BATCH = 20;
+
+  while (allUsers.length < maxResults && page < MAX_PAGES_PER_BATCH) {
+    if (signal?.aborted) {
+      throw new XApiError(ErrorTypes.API_ERROR, 'Check cancelled');
+    }
+
+    if (cursor && seenCursors.has(cursor)) {
+      break;
+    }
+    if (cursor) {
+      seenCursors.add(cursor);
+    }
+
+    const response = await fetchFollowingPage(userId, cursor, csrfToken, signal);
+    const { users, nextCursor } = parseFollowingResponse(response);
+    const verifiedFollowers = users.filter((user) => user.verified && user.followedBy);
+
+    allUsers.push(...verifiedFollowers);
+    page++;
+
+    if (onProgress) {
+      onProgress({
+        loaded: allUsers.length,
+        page: page
+      });
+    }
+
+    if (allUsers.length >= maxResults) {
+      return {
+        users: allUsers.slice(0, maxResults),
+        hasMore: Boolean(nextCursor),
+        nextCursor: nextCursor || null
+      };
+    }
+
+    if (!nextCursor || users.length === 0) {
+      break;
+    }
+
+    cursor = nextCursor;
+    await delay(1000);
+  }
+
+  return {
+    users: allUsers,
+    hasMore: false,
+    nextCursor: null
+  };
+}
+
 // Get current logged-in user
 export async function getCurrentUser(csrfToken, signal) {
   const variables = {

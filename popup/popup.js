@@ -54,7 +54,8 @@ const elements = {
   emptyState: null,
   versionInfo: null,
   updateLink: null,
-  updateMessage: null
+  updateMessage: null,
+  openSidePanelBtn: null
 };
 
 // State
@@ -158,6 +159,7 @@ function initElements() {
   elements.updateLink = document.getElementById('updateLink');
   elements.updateMessage = document.getElementById('updateMessage');
   elements.serverNotification = document.getElementById('serverNotification');
+  elements.openSidePanelBtn = document.getElementById('openSidePanelBtn');
 }
 
 async function initLanguage() {
@@ -259,6 +261,35 @@ function setupEventListeners() {
   // Export buttons
   elements.exportCsvBtn.addEventListener('click', () => exportData('csv'));
   elements.exportJsonBtn.addEventListener('click', () => exportData('json'));
+
+  // Side panel button
+  if (elements.openSidePanelBtn) {
+    console.log('[Popup] Side panel button found, adding click listener');
+    elements.openSidePanelBtn.addEventListener('click', async () => {
+      console.log('[Popup] Side panel button clicked!');
+      try {
+        if (!chrome.sidePanel) {
+          console.error('[Popup] chrome.sidePanel API not available');
+          alert('Side Panel API not available. Please make sure you are using Chrome 114+');
+          return;
+        }
+        console.log('[Popup] Getting current window...');
+        const currentWindow = await chrome.windows.getCurrent();
+        if (!currentWindow?.id) {
+          throw new Error('Could not determine current Chrome window');
+        }
+        console.log('[Popup] Current window:', currentWindow.id);
+        console.log('[Popup] Opening side panel...');
+        await chrome.sidePanel.open({ windowId: currentWindow.id });
+        console.log('[Popup] Side panel opened successfully!');
+      } catch (error) {
+        console.error('[Popup] Failed to open side panel:', error);
+        alert(`Failed to open side panel: ${error.message}`);
+      }
+    });
+  } else {
+    console.error('[Popup] Side panel button NOT FOUND!');
+  }
 
   // Continue check button
   elements.continueCheckBtn.addEventListener('click', handleContinueCheck);

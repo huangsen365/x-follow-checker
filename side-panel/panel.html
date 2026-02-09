@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verified Followers - X Follow Checker</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <div class="panel-container">
+    <!-- Header -->
+    <header class="panel-header">
+      <h1 class="panel-title" data-i18n="verifiedFollowers">Verified Followers</h1>
+      <select id="langSelect" class="lang-select">
+        <option value="en">EN</option>
+        <option value="zh">简中</option>
+        <option value="zh-TW">繁中</option>
+      </select>
+    </header>
+
+    <div class="panel-content">
+      <!-- Input Section -->
+      <section class="input-section">
+        <div class="input-group">
+          <span class="input-prefix">@</span>
+          <input
+            type="text"
+            id="usernameInput"
+            class="username-input"
+            placeholder="username"
+            autocomplete="off"
+          >
+          <button id="clearInput" class="clear-btn hidden" title="Clear">×</button>
+        </div>
+        <button id="loadBtn" class="btn btn-primary">
+          <span class="btn-text" data-i18n="loadVerified">Load Verified Followers</span>
+          <span class="btn-loading hidden">
+            <span class="spinner"></span>
+            <span data-i18n="loading">Loading...</span>
+          </span>
+        </button>
+      </section>
+
+      <!-- Progress Section -->
+      <section id="progressSection" class="progress-section hidden">
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <p id="progressText" class="progress-text">Loading...</p>
+      </section>
+
+      <!-- Stats -->
+      <section id="statsSection" class="stats-section hidden">
+        <div class="stat-card">
+          <span class="stat-value" id="verifiedCount">0</span>
+          <span class="stat-label" data-i18n="verifiedFollowersLoaded">Verified Followers</span>
+        </div>
+      </section>
+
+      <!-- Profile Browse Controls -->
+      <section id="browseSection" class="browse-section hidden">
+        <p id="browseInfo" class="browse-info" data-i18n="noProfileSelected">No profile selected</p>
+        <div class="browse-actions">
+          <button id="browsePrevBtn" class="btn btn-secondary" disabled>
+            <span data-i18n="prevProfile">Prev Profile</span>
+          </button>
+          <button id="browseNextBtn" class="btn btn-primary" disabled>
+            <span data-i18n="nextProfile">Next Profile</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Followers List -->
+      <section id="followersList" class="followers-list hidden">
+        <!-- Follower cards will be rendered here -->
+      </section>
+
+      <!-- Pagination -->
+      <section id="paginationSection" class="pagination-section hidden">
+        <button id="prevBtn" class="btn btn-secondary" disabled>
+          <span data-i18n="previous">Previous</span>
+        </button>
+        <span id="pageInfo" class="page-info">Page 1</span>
+        <button id="nextBtn" class="btn btn-primary" disabled>
+          <span data-i18n="next">Next</span>
+        </button>
+      </section>
+
+      <!-- Empty State -->
+      <section id="emptyState" class="empty-state">
+        <div class="empty-icon">✓</div>
+        <h3 data-i18n="noVerifiedYet">No verified followers loaded yet</h3>
+        <p data-i18n="enterUsernameToStart">Enter a username above and click "Load Verified Followers"</p>
+      </section>
+
+      <!-- Error Section -->
+      <section id="errorSection" class="error-section hidden">
+        <div class="error-icon">⚠️</div>
+        <h3 id="errorTitle" class="error-title">Error</h3>
+        <p id="errorMessage" class="error-message"></p>
+        <button id="retryBtn" class="btn btn-secondary" data-i18n="retry">Retry</button>
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="panel-footer">
+      <p class="footer-note" data-i18n="sidePanelNote">Click on a follower to visit their profile</p>
+    </footer>
+  </div>
+
+  <script type="module" src="panel.js"></script>
+</body>
+</html>
