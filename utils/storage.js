@@ -7,7 +7,8 @@ const STORAGE_KEYS = {
   CHECKPOINT: 'checkpoint',
   USERNAME_HISTORY: 'usernameHistory',
   LAST_SELECTED_USERNAME: 'lastSelectedUsername',
-  POPUP_UI_STATE: 'popupUiState'
+  POPUP_UI_STATE: 'popupUiState',
+  VERIFIED_BROWSE_PROGRESS: 'verifiedBrowseProgress'
 };
 
 function getPopupStorageArea() {
@@ -209,6 +210,13 @@ export async function deleteUsername(username) {
     await remove(STORAGE_KEYS.LAST_SELECTED_USERNAME);
   }
 
+  // Remove side panel browse progress for this username
+  const browseProgress = await get(STORAGE_KEYS.VERIFIED_BROWSE_PROGRESS) || {};
+  if (browseProgress[key]) {
+    delete browseProgress[key];
+    await set(STORAGE_KEYS.VERIFIED_BROWSE_PROGRESS, browseProgress);
+  }
+
   return filtered;
 }
 
@@ -230,6 +238,7 @@ export async function clearAllUserData() {
   await remove(STORAGE_KEYS.LAST_CHECK);
   await remove(STORAGE_KEYS.CHECKPOINT);
   await remove(STORAGE_KEYS.LAST_SELECTED_USERNAME);
+  await remove(STORAGE_KEYS.VERIFIED_BROWSE_PROGRESS);
 }
 
 // Popup UI state (session storage if available)

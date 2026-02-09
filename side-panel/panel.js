@@ -48,6 +48,13 @@ let cachedFirstPage = null;
 let cachedUsername = '';
 let cacheCheckRequestId = 0;
 
+const BROWSE_PROGRESS_STORAGE_KEY = 'verifiedBrowseProgress';
+const BROWSE_PROGRESS_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const NON_PROFILE_PATHS = new Set([
+  'home', 'explore', 'notifications', 'messages', 'compose', 'i', 'search',
+  'settings', 'login', 'signup', 'tos', 'privacy', 'help', 'about'
+]);
+
 // Initialize
 console.log('[Side Panel] Script loaded');
 
@@ -67,7 +74,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     console.log('[Side Panel] Event listeners set up');
 
-    updateUI();
+    const restored = await restoreStateOnOpen();
+    if (!restored) {
+      updateUI();
+    }
   } catch (error) {
     console.error('[Side Panel] Initialization error:', error);
   }
@@ -174,6 +184,24 @@ function setupEventListeners() {
       updateProgress(message.loaded, message.page);
     }
   });
+
+  if (chrome.tabs?.onActivated) {
+    chrome.tabs.onActivated.addListener(() => {
+      highlightCurrentProfileFromTab().catch((error) => {
+        console.warn('[Side Panel] Failed to sync active tab profile:', error);
+      });
+    });
+  }
+
+  if (chrome.tabs?.onUpdated) {
+    chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+      if (!tab?.active) return;
+      if (!changeInfo.url && changeInfo.status !== 'complete') return;
+      highlightCurrentProfileFromTab().catch((error) => {
+        console.warn('[Side Panel] Failed to sync updated tab profile:', error);
+      });
+    });
+  }
 }
 
 function updateInputClearState() {
@@ -266,6 +294,86 @@ async function refreshLoadButtonMode() {
     cachedUsername = '';
     setLoadButtonMode('load');
   }
+}
+
+function getBrowseProgressStorageKey(username) {
+  return username.toLowerCase();
+}
+
+async function getBrowseProgress(username) {
+  const all = await storage.get(BROWSE_PROGRESS_STORAGE_KEY) || {};
+  const key = getBrowseProgressStorageKey(username);
+  const progress = all[key];
+  if (!progress) return null;
+
+  const isExpired = (Date.now() - (progress.timestamp || 0)) > BROWSE_PROGRESS_TTL_MS;
+  if (isExpired) {
+    delete all[key];
+    await storage.set(BROWSE_PROGRESS_STORAGE_KEY, all);
+    return null;
+  }
+
+  if (!progress.pageData || !Array.isArray(progress.pageData.followers)) {
+    return null;
+  }
+  return progress;
+}
+
+async function saveBrowseProgress() {
+  if (!currentUsername) return;
+  const currentPageData = loadedPages[currentPage - 1];
+  if (!currentPageData || !Array.isArray(currentPageData.followers)) return;
+
+  const all = await storage.get(BROWSE_PROGRESS_STORAGE_KEY) || {};
+  const key = getBrowseProgressStorageKey(currentUsername);
+  all[key] = {
+    page: currentPage,
+    selectedIndex: selectedFollowerIndex,
+    pageData: {
+      followers: currentPageData.followers,
+      hasMore: currentPageData.hasMore,
+      nextCursor: currentPageData.nextCursor
+    },
+    userInfo: userInfo,
+    timestamp: Date.now()
+  };
+  await storage.set(BROWSE_PROGRESS_STORAGE_KEY, all);
+}
+
+async function restoreStateOnOpen() {
+  const username = normalizeUsername(elements.usernameInput.value);
+  if (!username) return false;
+
+  currentUsername = username;
+
+  try {
+    const progress = await getBrowseProgress(username);
+    if (progress) {
+      userInfo = progress.userInfo || null;
+      setCurrentPageData(
+        progress.page || 1,
+        progress.pageData.followers,
+        progress.pageData.hasMore,
+        progress.pageData.nextCursor,
+        Number.isInteger(progress.selectedIndex) ? progress.selectedIndex : -1
+      );
+      setLoadButtonMode('refetch');
+      showResults();
+      await highlightCurrentProfileFromTab();
+      return true;
+    }
+  } catch (error) {
+    console.warn('[Side Panel] Failed to restore browse progress:', error);
+  }
+
+  if (cachedFirstPage && cachedUsername === username) {
+    applyFollowersData(username, cachedFirstPage);
+    setLoadButtonMode('refetch');
+    await highlightCurrentProfileFromTab();
+    return true;
+  }
+
+  return false;
 }
 
 function applyFollowersData(username, data) {
@@ -434,6 +542,7 @@ async function handleProfileNavigation(direction) {
       updateSelectedFollowerCard();
       updateBrowseUI();
       await openSelectedFollowerInCurrentTab();
+      saveBrowseProgress().catch(() => {});
       return;
     }
 
@@ -451,6 +560,7 @@ async function handleProfileNavigation(direction) {
     );
     showResults();
     await openSelectedFollowerInCurrentTab();
+    saveBrowseProgress().catch(() => {});
     return;
   }
 
@@ -460,6 +570,7 @@ async function handleProfileNavigation(direction) {
     updateSelectedFollowerCard();
     updateBrowseUI();
     await openSelectedFollowerInCurrentTab();
+    saveBrowseProgress().catch(() => {});
     return;
   }
 
@@ -468,6 +579,7 @@ async function handleProfileNavigation(direction) {
     updateSelectedFollowerCard();
     updateBrowseUI();
     await openSelectedFollowerInCurrentTab();
+    saveBrowseProgress().catch(() => {});
     return;
   }
 
@@ -484,6 +596,7 @@ async function handleProfileNavigation(direction) {
     );
     showResults();
     await openSelectedFollowerInCurrentTab();
+    saveBrowseProgress().catch(() => {});
     return;
   }
 
@@ -515,6 +628,7 @@ async function handleProfileNavigation(direction) {
 
       if (followers.length > 0) {
         await openSelectedFollowerInCurrentTab();
+        saveBrowseProgress().catch(() => {});
       }
     } else {
       showError(response?.error || { type: 'API_ERROR', message: 'Unknown error' });
@@ -573,6 +687,22 @@ function updateSelectedFollowerCard() {
       card.classList.remove('selected');
     }
   });
+
+  scrollSelectedFollowerIntoView();
+}
+
+function scrollSelectedFollowerIntoView(behavior = 'smooth') {
+  if (selectedFollowerIndex < 0) return;
+
+  const cards = elements.followersList.querySelectorAll('.follower-card');
+  const selectedCard = cards[selectedFollowerIndex];
+  if (!selectedCard) return;
+
+  selectedCard.scrollIntoView({
+    behavior: behavior,
+    block: 'center',
+    inline: 'nearest'
+  });
 }
 
 async function openSelectedFollowerInCurrentTab() {
@@ -595,6 +725,82 @@ async function openFollowerInCurrentTab(screenName) {
   }
 
   await chrome.tabs.create({ url, active: true });
+}
+
+function extractProfileUsernameFromUrl(url) {
+  if (!url) return null;
+
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+    if (hostname !== 'x.com' && hostname !== 'twitter.com' && hostname !== 'www.x.com' && hostname !== 'www.twitter.com') {
+      return null;
+    }
+
+    const firstPath = parsed.pathname.split('/').filter(Boolean)[0];
+    if (!firstPath) return null;
+
+    const username = firstPath.replace(/^@+/, '').toLowerCase();
+    if (!username || NON_PROFILE_PATHS.has(username)) {
+      return null;
+    }
+    return username;
+  } catch (error) {
+    return null;
+  }
+}
+
+async function getActiveTabProfileUsername() {
+  try {
+    const [activeTab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    return extractProfileUsernameFromUrl(activeTab?.url || '');
+  } catch (error) {
+    return null;
+  }
+}
+
+async function highlightCurrentProfileFromTab() {
+  if (loadedPages.length === 0) return;
+
+  const tabProfileUsername = await getActiveTabProfileUsername();
+  if (!tabProfileUsername) return;
+
+  let matchedPageIndex = -1;
+  let matchedFollowerIndex = -1;
+
+  for (let pageIndex = 0; pageIndex < loadedPages.length; pageIndex++) {
+    const page = loadedPages[pageIndex];
+    if (!page || !Array.isArray(page.followers)) continue;
+
+    const followerIndex = page.followers.findIndex((follower) => {
+      return follower?.screenName?.toLowerCase() === tabProfileUsername;
+    });
+
+    if (followerIndex >= 0) {
+      matchedPageIndex = pageIndex;
+      matchedFollowerIndex = followerIndex;
+      break;
+    }
+  }
+
+  if (matchedPageIndex < 0) return;
+
+  const targetPage = matchedPageIndex + 1;
+  if (currentPage !== targetPage || selectedFollowerIndex !== matchedFollowerIndex) {
+    const pageData = loadedPages[matchedPageIndex];
+    setCurrentPageData(
+      targetPage,
+      pageData.followers,
+      pageData.hasMore,
+      pageData.nextCursor,
+      matchedFollowerIndex
+    );
+    showResults();
+    return;
+  }
+
+  updateSelectedFollowerCard();
+  updateBrowseUI();
 }
 
 function showLoading() {
@@ -630,6 +836,10 @@ function showResults() {
   // Render followers
   renderFollowers(allFollowers);
   elements.followersList.classList.remove('hidden');
+  if (selectedFollowerIndex >= 0) {
+    // Ensure restored/current profile is visible when list is rendered.
+    scrollSelectedFollowerIntoView('auto');
+  }
 
   // Show profile browse controls
   elements.browseSection.classList.remove('hidden');
@@ -638,6 +848,11 @@ function showResults() {
   elements.paginationSection.classList.remove('hidden');
   updatePaginationUI();
   updateBrowseUI();
+
+  highlightCurrentProfileFromTab().catch((error) => {
+    console.warn('[Side Panel] Failed to sync profile highlight:', error);
+  });
+  saveBrowseProgress().catch(() => {});
 
   // Reset button
   elements.loadBtn.disabled = false;
@@ -680,6 +895,7 @@ function renderFollowers(followers) {
       updateSelectedFollowerCard();
       updateBrowseUI();
       await openFollowerInCurrentTab(follower.screenName);
+      saveBrowseProgress().catch(() => {});
     });
 
     elements.followersList.appendChild(card);
@@ -696,8 +912,9 @@ function updatePaginationUI() {
   }
 
   // Update button states
-  const hasCachedNextPage = currentPage < loadedPages.length;
-  elements.prevBtn.disabled = currentPage <= 1;
+  const hasCachedPreviousPage = Boolean(loadedPages[currentPage - 2]);
+  const hasCachedNextPage = Boolean(loadedPages[currentPage]);
+  elements.prevBtn.disabled = !hasCachedPreviousPage;
   elements.nextBtn.disabled = !(hasCachedNextPage || (hasMore && nextCursor));
 }
 
@@ -716,8 +933,9 @@ function updateBrowseUI() {
     elements.browseInfo.textContent = t('noProfileSelected');
   }
 
-  const hasCachedNextPage = currentPage < loadedPages.length;
-  const canGoPrev = selectedFollowerIndex > 0 || (selectedFollowerIndex >= 0 && currentPage > 1);
+  const hasCachedPreviousPage = Boolean(loadedPages[currentPage - 2]);
+  const hasCachedNextPage = Boolean(loadedPages[currentPage]);
+  const canGoPrev = selectedFollowerIndex > 0 || (selectedFollowerIndex >= 0 && hasCachedPreviousPage);
   const canGoNext = (
     (selectedFollowerIndex < 0 && total > 0) ||
     selectedFollowerIndex < total - 1 ||
