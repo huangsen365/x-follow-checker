@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logo Preview - X Follow Checker</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: #1a1a1a;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    gap: 48px;
+  }
+  h1 { font-size: 24px; font-weight: 600; }
+  h2 { font-size: 16px; font-weight: 500; color: #999; }
+  .section { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+  .row { display: flex; gap: 36px; align-items: flex-end; flex-wrap: wrap; justify-content: center; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .label { font-size: 12px; color: #666; }
+  .on-white {
+    background: #fff;
+    padding: 24px 32px;
+    border-radius: 12px;
+    display: inline-flex;
+    gap: 36px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .buttons { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  button {
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.2s;
+  }
+  button:hover { background: #444; }
+  .hint { font-size: 12px; color: #555; max-width: 500px; text-align: center; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<h1>X Follow Checker — Logo Preview</h1>
+
+<!-- === Square version === -->
+<div class="section">
+  <h2>Square (Chrome Extension Icons)</h2>
+  <div class="row">
+    <div class="item">
+      <svg width="16" height="16" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" id="icon-sq-16">
+        <rect width="512" height="512" fill="#000"/>
+        <defs>
+          <clipPath id="a-tl"><rect x="0" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="a-tr"><rect x="256" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="a-bl"><rect x="0" y="256" width="256" height="256"/></clipPath>
+          <clipPath id="a-br"><rect x="256" y="256" width="256" height="256"/></clipPath>
+        </defs>
+        <g clip-path="url(#a-tl)"><polygon points="96,40 152,40 416,472 360,472" fill="#FF3B30"/><polygon points="360,40 416,40 152,472 96,472" fill="#FF3B30"/></g>
+        <g clip-path="url(#a-tr)"><polygon points="96,40 152,40 416,472 360,472" fill="#FFCC00"/><polygon points="360,40 416,40 152,472 96,472" fill="#FFCC00"/></g>
+        <g clip-path="url(#a-bl)"><polygon points="96,40 152,40 416,472 360,472" fill="#007AFF"/><polygon points="360,40 416,40 152,472 96,472" fill="#007AFF"/></g>
+        <g clip-path="url(#a-br)"><polygon points="96,40 152,40 416,472 360,472" fill="#34C759"/><polygon points="360,40 416,40 152,472 96,472" fill="#34C759"/></g><text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="Arial,Helvetica,sans-serif" font-size="384" font-weight="900" fill="#FFF" stroke="rgba(255,255,255,0.3)" stroke-width="16" stroke-linejoin="round" paint-order="stroke">?</text>
+      </svg>
+      <span class="label">16×16</span>
+    </div>
+    <div class="item">
+      <svg width="48" height="48" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" fill="#000"/>
+        <defs>
+          <clipPath id="b-tl"><rect x="0" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="b-tr"><rect x="256" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="b-bl"><rect x="0" y="256" width="256" height="256"/></clipPath>
+          <clipPath id="b-br"><rect x="256" y="256" width="256" height="256"/></clipPath>
+        </defs>
+        <g clip-path="url(#b-tl)"><polygon points="96,40 152,40 416,472 360,472" fill="#FF3B30"/><polygon points="360,40 416,40 152,472 96,472" fill="#FF3B30"/></g>
+        <g clip-path="url(#b-tr)"><polygon points="96,40 152,40 416,472 360,472" fill="#FFCC00"/><polygon points="360,40 416,40 152,472 96,472" fill="#FFCC00"/></g>
+        <g clip-path="url(#b-bl)"><polygon points="96,40 152,40 416,472 360,472" fill="#007AFF"/><polygon points="360,40 416,40 152,472 96,472" fill="#007AFF"/></g>
+        <g clip-path="url(#b-br)"><polygon points="96,40 152,40 416,472 360,472" fill="#34C759"/><polygon points="360,40 416,40 152,472 96,472" fill="#34C759"/></g><text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="Arial,Helvetica,sans-serif" font-size="384" font-weight="900" fill="#FFF" stroke="rgba(255,255,255,0.3)" stroke-width="16" stroke-linejoin="round" paint-order="stroke">?</text>
+      </svg>
+      <span class="label">48×48</span>
+    </div>
+    <div class="item">
+      <svg width="128" height="128" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" fill="#000"/>
+        <defs>
+          <clipPath id="c-tl"><rect x="0" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="c-tr"><rect x="256" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="c-bl"><rect x="0" y="256" width="256" height="256"/></clipPath>
+          <clipPath id="c-br"><rect x="256" y="256" width="256" height="256"/></clipPath>
+        </defs>
+        <g clip-path="url(#c-tl)"><polygon points="96,40 152,40 416,472 360,472" fill="#FF3B30"/><polygon points="360,40 416,40 152,472 96,472" fill="#FF3B30"/></g>
+        <g clip-path="url(#c-tr)"><polygon points="96,40 152,40 416,472 360,472" fill="#FFCC00"/><polygon points="360,40 416,40 152,472 96,472" fill="#FFCC00"/></g>
+        <g clip-path="url(#c-bl)"><polygon points="96,40 152,40 416,472 360,472" fill="#007AFF"/><polygon points="360,40 416,40 152,472 96,472" fill="#007AFF"/></g>
+        <g clip-path="url(#c-br)"><polygon points="96,40 152,40 416,472 360,472" fill="#34C759"/><polygon points="360,40 416,40 152,472 96,472" fill="#34C759"/></g><text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="Arial,Helvetica,sans-serif" font-size="384" font-weight="900" fill="#FFF" stroke="rgba(255,255,255,0.3)" stroke-width="16" stroke-linejoin="round" paint-order="stroke">?</text>
+      </svg>
+      <span class="label">128×128</span>
+    </div>
+    <div class="item">
+      <svg width="256" height="256" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" id="icon-square">
+        <rect width="512" height="512" fill="#000"/>
+        <defs>
+          <clipPath id="d-tl"><rect x="0" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="d-tr"><rect x="256" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="d-bl"><rect x="0" y="256" width="256" height="256"/></clipPath>
+          <clipPath id="d-br"><rect x="256" y="256" width="256" height="256"/></clipPath>
+        </defs>
+        <g clip-path="url(#d-tl)"><polygon points="96,40 152,40 416,472 360,472" fill="#FF3B30"/><polygon points="360,40 416,40 152,472 96,472" fill="#FF3B30"/></g>
+        <g clip-path="url(#d-tr)"><polygon points="96,40 152,40 416,472 360,472" fill="#FFCC00"/><polygon points="360,40 416,40 152,472 96,472" fill="#FFCC00"/></g>
+        <g clip-path="url(#d-bl)"><polygon points="96,40 152,40 416,472 360,472" fill="#007AFF"/><polygon points="360,40 416,40 152,472 96,472" fill="#007AFF"/></g>
+        <g clip-path="url(#d-br)"><polygon points="96,40 152,40 416,472 360,472" fill="#34C759"/><polygon points="360,40 416,40 152,472 96,472" fill="#34C759"/></g><text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="Arial,Helvetica,sans-serif" font-size="384" font-weight="900" fill="#FFF" stroke="rgba(255,255,255,0.3)" stroke-width="16" stroke-linejoin="round" paint-order="stroke">?</text>
+      </svg>
+      <span class="label">256×256</span>
+    </div>
+  </div>
+</div>
+
+<!-- === Rounded version === -->
+<div class="section">
+  <h2>Rounded (Store / Marketing)</h2>
+  <div class="row">
+    <div class="item">
+      <svg width="128" height="128" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="e-round"><rect width="512" height="512" rx="96"/></clipPath>
+          <clipPath id="e-tl"><rect x="0" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="e-tr"><rect x="256" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="e-bl"><rect x="0" y="256" width="256" height="256"/></clipPath>
+          <clipPath id="e-br"><rect x="256" y="256" width="256" height="256"/></clipPath>
+        </defs>
+        <g clip-path="url(#e-round)">
+          <rect width="512" height="512" fill="#000"/>
+          <g clip-path="url(#e-tl)"><polygon points="96,40 152,40 416,472 360,472" fill="#FF3B30"/><polygon points="360,40 416,40 152,472 96,472" fill="#FF3B30"/></g>
+          <g clip-path="url(#e-tr)"><polygon points="96,40 152,40 416,472 360,472" fill="#FFCC00"/><polygon points="360,40 416,40 152,472 96,472" fill="#FFCC00"/></g>
+          <g clip-path="url(#e-bl)"><polygon points="96,40 152,40 416,472 360,472" fill="#007AFF"/><polygon points="360,40 416,40 152,472 96,472" fill="#007AFF"/></g>
+          <g clip-path="url(#e-br)"><polygon points="96,40 152,40 416,472 360,472" fill="#34C759"/><polygon points="360,40 416,40 152,472 96,472" fill="#34C759"/></g><text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="Arial,Helvetica,sans-serif" font-size="384" font-weight="900" fill="#FFF" stroke="rgba(255,255,255,0.3)" stroke-width="16" stroke-linejoin="round" paint-order="stroke">?</text>
+        </g>
+      </svg>
+      <span class="label">128×128</span>
+    </div>
+    <div class="item">
+      <svg width="256" height="256" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" id="icon-rounded">
+        <defs>
+          <clipPath id="f-round"><rect width="512" height="512" rx="96"/></clipPath>
+          <clipPath id="f-tl"><rect x="0" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="f-tr"><rect x="256" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="f-bl"><rect x="0" y="256" width="256" height="256"/></clipPath>
+          <clipPath id="f-br"><rect x="256" y="256" width="256" height="256"/></clipPath>
+        </defs>
+        <g clip-path="url(#f-round)">
+          <rect width="512" height="512" fill="#000"/>
+          <g clip-path="url(#f-tl)"><polygon points="96,40 152,40 416,472 360,472" fill="#FF3B30"/><polygon points="360,40 416,40 152,472 96,472" fill="#FF3B30"/></g>
+          <g clip-path="url(#f-tr)"><polygon points="96,40 152,40 416,472 360,472" fill="#FFCC00"/><polygon points="360,40 416,40 152,472 96,472" fill="#FFCC00"/></g>
+          <g clip-path="url(#f-bl)"><polygon points="96,40 152,40 416,472 360,472" fill="#007AFF"/><polygon points="360,40 416,40 152,472 96,472" fill="#007AFF"/></g>
+          <g clip-path="url(#f-br)"><polygon points="96,40 152,40 416,472 360,472" fill="#34C759"/><polygon points="360,40 416,40 152,472 96,472" fill="#34C759"/></g><text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="Arial,Helvetica,sans-serif" font-size="384" font-weight="900" fill="#FFF" stroke="rgba(255,255,255,0.3)" stroke-width="16" stroke-linejoin="round" paint-order="stroke">?</text>
+        </g>
+      </svg>
+      <span class="label">256×256</span>
+    </div>
+  </div>
+</div>
+
+<!-- === On white background === -->
+<div class="section">
+  <h2>On White Background</h2>
+  <div class="on-white">
+    <div class="item">
+      <svg width="48" height="48" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" fill="#000"/>
+        <defs>
+          <clipPath id="g-tl"><rect x="0" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="g-tr"><rect x="256" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="g-bl"><rect x="0" y="256" width="256" height="256"/></clipPath>
+          <clipPath id="g-br"><rect x="256" y="256" width="256" height="256"/></clipPath>
+        </defs>
+        <g clip-path="url(#g-tl)"><polygon points="96,40 152,40 416,472 360,472" fill="#FF3B30"/><polygon points="360,40 416,40 152,472 96,472" fill="#FF3B30"/></g>
+        <g clip-path="url(#g-tr)"><polygon points="96,40 152,40 416,472 360,472" fill="#FFCC00"/><polygon points="360,40 416,40 152,472 96,472" fill="#FFCC00"/></g>
+        <g clip-path="url(#g-bl)"><polygon points="96,40 152,40 416,472 360,472" fill="#007AFF"/><polygon points="360,40 416,40 152,472 96,472" fill="#007AFF"/></g>
+        <g clip-path="url(#g-br)"><polygon points="96,40 152,40 416,472 360,472" fill="#34C759"/><polygon points="360,40 416,40 152,472 96,472" fill="#34C759"/></g><text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="Arial,Helvetica,sans-serif" font-size="384" font-weight="900" fill="#FFF" stroke="rgba(255,255,255,0.3)" stroke-width="16" stroke-linejoin="round" paint-order="stroke">?</text>
+      </svg>
+      <span class="label" style="color:#999">48×48</span>
+    </div>
+    <div class="item">
+      <svg width="128" height="128" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" fill="#000"/>
+        <defs>
+          <clipPath id="h-tl"><rect x="0" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="h-tr"><rect x="256" y="0" width="256" height="256"/></clipPath>
+          <clipPath id="h-bl"><rect x="0" y="256" width="256" height="256"/></clipPath>
+          <clipPath id="h-br"><rect x="256" y="256" width="256" height="256"/></clipPath>
+        </defs>
+        <g clip-path="url(#h-tl)"><polygon points="96,40 152,40 416,472 360,472" fill="#FF3B30"/><polygon points="360,40 416,40 152,472 96,472" fill="#FF3B30"/></g>
+        <g clip-path="url(#h-tr)"><polygon points="96,40 152,40 416,472 360,472" fill="#FFCC00"/><polygon points="360,40 416,40 152,472 96,472" fill="#FFCC00"/></g>
+        <g clip-path="url(#h-bl)"><polygon points="96,40 152,40 416,472 360,472" fill="#007AFF"/><polygon points="360,40 416,40 152,472 96,472" fill="#007AFF"/></g>
+        <g clip-path="url(#h-br)"><polygon points="96,40 152,40 416,472 360,472" fill="#34C759"/><polygon points="360,40 416,40 152,472 96,472" fill="#34C759"/></g><text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="Arial,Helvetica,sans-serif" font-size="384" font-weight="900" fill="#FFF" stroke="rgba(255,255,255,0.3)" stroke-width="16" stroke-linejoin="round" paint-order="stroke">?</text>
+      </svg>
+      <span class="label" style="color:#999">128×128</span>
+    </div>
+  </div>
+</div>
+
+<!-- === Download buttons === -->
+<div class="section">
+  <h2>Download</h2>
+  <div class="buttons">
+    <button onclick="downloadSVG('square')">Download SVG (Square)</button>
+    <button onclick="downloadSVG('rounded')">Download SVG (Rounded)</button>
+  </div>
+  <div class="buttons">
+    <button onclick="downloadPNG(16)">PNG 16×16</button>
+    <button onclick="downloadPNG(48)">PNG 48×48</button>
+    <button onclick="downloadPNG(128)">PNG 128×128</button>
+    <button onclick="downloadPNG(256)">PNG 256×256</button>
+    <button onclick="downloadPNG(512)">PNG 512×512</button>
+  </div>
+  <p class="hint">
+    Color layout: Top-left <span style="color:#FF3B30">Red</span> · Top-right <span style="color:#FFCC00">Yellow</span> · Bottom-left <span style="color:#007AFF">Blue</span> · Bottom-right <span style="color:#34C759">Green</span>
+  </p>
+</div>
+
+<script>
+function makeSVG(rounded) {
+  const rx = rounded ? ' rx="96"' : '';
+  const clipOpen = rounded ? `<clipPath id="rc"><rect width="512" height="512" rx="96"/></clipPath>` : '';
+  const gOpen = rounded ? '<g clip-path="url(#rc)">' : '<g>';
+  const gClose = '</g>';
+  return `<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    ${clipOpen}
+    <clipPath id="tl"><rect x="0" y="0" width="256" height="256"/></clipPath>
+    <clipPath id="tr"><rect x="256" y="0" width="256" height="256"/></clipPath>
+    <clipPath id="bl"><rect x="0" y="256" width="256" height="256"/></clipPath>
+    <clipPath id="br"><rect x="256" y="256" width="256" height="256"/></clipPath>
+  </defs>
+  ${gOpen}
+    <rect width="512" height="512" fill="#000"${rx}/>
+    <g clip-path="url(#tl)"><polygon points="96,40 152,40 416,472 360,472" fill="#FF3B30"/><polygon points="360,40 416,40 152,472 96,472" fill="#FF3B30"/></g>
+    <g clip-path="url(#tr)"><polygon points="96,40 152,40 416,472 360,472" fill="#FFCC00"/><polygon points="360,40 416,40 152,472 96,472" fill="#FFCC00"/></g>
+    <g clip-path="url(#bl)"><polygon points="96,40 152,40 416,472 360,472" fill="#007AFF"/><polygon points="360,40 416,40 152,472 96,472" fill="#007AFF"/></g>
+    <g clip-path="url(#br)"><polygon points="96,40 152,40 416,472 360,472" fill="#34C759"/><polygon points="360,40 416,40 152,472 96,472" fill="#34C759"/></g><text x="256" y="256" text-anchor="middle" dominant-baseline="central" font-family="Arial,Helvetica,sans-serif" font-size="384" font-weight="900" fill="#FFF" stroke="rgba(255,255,255,0.3)" stroke-width="16" stroke-linejoin="round" paint-order="stroke">?</text>
+  ${gClose}
+</svg>`;
+}
+
+function downloadSVG(type) {
+  const svg = makeSVG(type === 'rounded');
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `x-follow-checker-logo-${type}.svg`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function downloadPNG(size) {
+  const svg = makeSVG(false);
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0, size, size);
+    URL.revokeObjectURL(url);
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = `icon${size}.png`;
+    a.click();
+  };
+  img.src = url;
+}
+</script>
+
+</body>
+</html>
