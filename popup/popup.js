@@ -1276,12 +1276,13 @@ function exportData(format) {
   let content, filename, mimeType;
 
   if (format === 'csv') {
-    const headers = ['Screen Name', 'Display Name', 'Follows Back', 'Verified'];
+    const headers = ['Screen Name', 'Display Name', 'Follows Back', 'Verified', 'Profile URL'];
     const rows = users.map(u => [
       csvEscape(u.screenName),
       csvEscape(u.name),
       csvEscape(u.followedBy ? 'Yes' : 'No'),
-      csvEscape(u.verified ? 'Yes' : 'No')
+      csvEscape(u.verified ? 'Yes' : 'No'),
+      csvEscape(`https://x.com/${u.screenName}`)
     ]);
 
     content = [headers.map(csvEscape), ...rows].map(row => row.join(',')).join('\n');
