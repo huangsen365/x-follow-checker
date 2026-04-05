@@ -1285,7 +1285,7 @@ function exportData(format) {
       csvEscape(`https://x.com/${u.screenName}`)
     ]);
 
-    content = [headers.map(csvEscape), ...rows].map(row => row.join(',')).join('\n');
+    content = '\uFEFF' + [headers.map(csvEscape), ...rows].map(row => row.join(',')).join('\n');
     filename = `x-follow-check-${currentFilter}-${Date.now()}.csv`;
     mimeType = 'text/csv';
   } else {

@@ -29,7 +29,12 @@ export async function remove(key) {
 }
 
 export async function getLanguage() {
-  return (await get(STORAGE_KEYS.LANGUAGE)) || 'en';
+  const saved = await get(STORAGE_KEYS.LANGUAGE);
+  if (saved) return saved;
+  const browserLang = (navigator.language || '').toLowerCase();
+  if (browserLang.startsWith('zh-tw') || browserLang.startsWith('zh-hant')) return 'zh-TW';
+  if (browserLang.startsWith('zh')) return 'zh';
+  return 'en';
 }
 
 export async function setLanguage(lang) {
